@@ -8,6 +8,7 @@
 #include <string>
 #include <string_view>
 #include <optional>
+#include <vector>
 
 struct range {
   size_t begin;
@@ -43,19 +44,44 @@ bool isValid(range r);
 int get_log_level();
 void set_log_level(int level);
 
+template<class T>
+std::ostream &log_(std::ostream &os, const T &r) {
+  return os << r;
+}
+
+template<class T, class ...Args>
+std::ostream &log_(std::ostream &os, const std::vector<T, Args...> &v) {
+  os << "[ ";
+  for (size_t i = 0; i < v.size(); ++i) {
+    if (i > 0)
+      os << ", ";
+    os << v[i];
+  }
+  return os << "]";
+}
+
 template <class... Args> void log(Args &&...args) {
   if (get_log_level() < 1)
     return;
-  (std::cout << ... << args);
+  (log_(std::cout, args), ...);
 }
 
 template <class... Args> void logln(Args &&...args) {
   if (get_log_level() < 1)
     return;
-  (std::cout << ... << args) << std::endl;
+  (log_(std::cout, args), ...);
+  std::cout << std::endl;
 }
 
 std::fstream get_input(std::string filename, int argc, const char **arg);
+
+
+template<template<class T, class ...R> class C, class T, class ...R>
+void sorted_insert(C<T, R...> &vec, T value) {
+  using std::begin; using std::end;
+  auto it = std::lower_bound(begin(vec), end(vec), value);
+  vec.insert(it, value);
+}
 
 #ifdef COMPILE_UTILS
 
