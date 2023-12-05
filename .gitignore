@@ -2,3 +2,6 @@ day*
 *.o
 *.out
 !*.cpp
+!*.h
+!*.hpp
+!*.txt

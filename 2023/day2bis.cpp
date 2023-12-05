@@ -88,6 +88,22 @@ bool acceptableCube(const cube &c) {
          c.b >= 0 && c.b <= MAX_VALUES.b;
 }
 
+cube min(const cube &left, const cube &right) {
+  return {
+    .r = min(left.r, right.r),
+    .g = min(left.g, right.g),
+    .b = min(left.b, right.b),
+  };
+}
+
+cube max(const cube &left, const cube &right) {
+  return {
+    .r = max(left.r, right.r),
+    .g = max(left.g, right.g),
+    .b = max(left.b, right.b),
+  };
+}
+
 int main(int argc, char **argv) {
 
   fstream file = get_input("day2.txt", argc, argv);
@@ -96,13 +112,13 @@ int main(int argc, char **argv) {
   string line;
   while (getline(file, line)) {
     auto cubes = parse_cubes(line);
-    log(cubes);
-    if (all_of(cubes.cubes.begin(), cubes.cubes.end(), acceptableCube)) {
-      sum += cubes.id;
-      logln("accepted -> ", sum);
-    } else {
-      logln("rejected");
+    cube min_values = {0, 0, 0};
+    log(cubes, " -> ");
+    for (const auto &c : cubes.cubes) {
+      min_values = max(min_values, c);
     }
+    logln("computed min: ", min_values);
+    sum += min_values.r * min_values.g * min_values.b;
   }
   cout << sum << endl;
 }
