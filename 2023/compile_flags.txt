@@ -1,3 +1,4 @@
 -std=c++2b
 -Wall
 -Wextra
+-DCOMPILE_UTILS=1

@@ -1,5 +1,5 @@
 # Specify the compiler to use
-CC = g++
+CC = clang++
 
 # Specify the target executable
 TARGET = $(basename $(notdir $(wildcard *.cpp)))
@@ -20,7 +20,7 @@ LIBRARIES =
 LIBS =
 
 # Specify the compile flags
-CFLAGS = -Wall -g -std=c++17 $(INCLUDES)
+CFLAGS = $(shell cat compile_flags.txt)
 
 # Specify the linker flags
 LDFLAGS =

@@ -1,1 +1,4 @@
-day*$
+day*
+*.o
+*.out
+!*.cpp
