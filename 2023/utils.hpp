@@ -14,10 +14,26 @@ struct range {
   size_t end;
 };
 
+inline bool operator==(const range &lhs, const range &rhs) {
+  return lhs.begin == rhs.begin && lhs.end == rhs.end;
+}
+
+template <>
+struct std::hash<range> {
+  size_t operator()(const range &r) const {
+    return std::hash<size_t>()(r.begin) ^ (std::hash<size_t>()(r.end) << 1);
+  }
+};
+
+
+std::ostream &operator<<(std::ostream &os, const range &r);
+
 template <class T> struct ranged {
   T value;
   range position;
 };
+template<class T>
+std::ostream &operator<<(std::ostream &os, const ranged<T> &r);
 
 range find_range(std::string_view str, const char *pattern, size_t pos);
 std::optional<ranged<std::string_view>> next_word(std::string_view str, size_t pos = 0);
@@ -39,7 +55,7 @@ template <class... Args> void logln(Args &&...args) {
   (std::cout << ... << args) << std::endl;
 }
 
-std::fstream get_input(std::string filename, int argc, char **arg);
+std::fstream get_input(std::string filename, int argc, const char **arg);
 
 #ifdef COMPILE_UTILS
 
@@ -50,7 +66,7 @@ int LOG_LEVEL = 0;
 int get_log_level() { return LOG_LEVEL; }
 void set_log_level(int level) { LOG_LEVEL = level; }
 
-std::fstream get_input(std::string filename, int argc, char **argv) {
+std::fstream get_input(std::string filename, int argc, const char **argv) {
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-d") == 0)
       set_log_level(1);
@@ -103,6 +119,15 @@ std::optional<ranged<std::string_view>> next_word(std::string_view str, size_t p
     return {{str.substr(r.begin, r.end - r.begin), r}};
   }
   return {};
+}
+
+std::ostream &operator<<(std::ostream &os, const range &r) {
+  return os << '[' << r.begin << ".." << r.end << ']';
+}
+
+template <class T>
+std::ostream &operator<<(std::ostream &os, const ranged<T> &r) {
+  return os << "{ " << r.value << " at " << r.position << " }";
 }
 #endif
 
