@@ -1,10 +1,12 @@
 #ifndef HEADER_GUARD_UTILS_HPP
 #define HEADER_GUARD_UTILS_HPP
 
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -14,7 +16,24 @@
 struct range {
   size_t begin;
   size_t end;
+
+  inline constexpr size_t size() const { return end - begin; }
+  inline constexpr bool contains(size_t pos) const {
+    return pos >= begin && pos < end;
+  }
+  inline constexpr bool contains(range r) const {
+    return r.begin >= begin && r.end <= end;
+  }
 };
+
+inline constexpr std::optional<range> combine(range left, range right) {
+  if (right.begin >= left.begin && right.begin <= left.end) {
+    return {{left.begin, std::max(left.end, right.end)}};
+  } else if (right.end >= left.begin && right.end <= left.end) {
+    return {{std::min(left.begin, right.begin), left.end}};
+  }
+  return {};
+}
 
 inline bool operator==(const range &lhs, const range &rhs) {
   return lhs.begin == rhs.begin && lhs.end == rhs.end;
@@ -38,7 +57,7 @@ std::ostream &operator<<(std::ostream &os, const ranged<T> &r);
 range find_range(std::string_view str, const char *pattern, size_t pos);
 std::optional<ranged<std::string_view>> next_word(std::string_view str,
                                                   size_t pos = 0);
-std::optional<ranged<int>> next_number(std::string_view str, size_t pos = 0);
+std::optional<ranged<size_t>> next_number(std::string_view str, size_t pos = 0);
 bool isValid(range r);
 
 int get_log_level();
@@ -50,13 +69,15 @@ template <class T> std::ostream &log_(std::ostream &os, const T &r) {
 
 template <class T, class... Args>
 std::ostream &log_(std::ostream &os, const std::vector<T, Args...> &v) {
-  os << "[ ";
+  os << "[";
   for (size_t i = 0; i < v.size(); ++i) {
     if (i > 0)
       os << ", ";
+    else
+      os << " ";
     os << v[i];
   }
-  return os << "]";
+  return os << " ]";
 }
 
 template <class... Args> void log(Args &&...args) {
@@ -74,36 +95,57 @@ template <class... Args> void logln(Args &&...args) {
 
 std::fstream get_input(std::string filename, int argc, const char **arg);
 
-template <template <class T, class... R> class C, class T, class... R>
-void sorted_insert(C<T, R...> &vec, T value) {
+template <template <class T, class... R> class C, class T, class U,
+          std::enable_if_t<std::is_convertible_v<std::decay_t<U>, T>, int> = 0, class... R>
+void sorted_insert(C<T, R...> &vec, U&& value) {
   using std::begin;
   using std::end;
   auto it = std::lower_bound(begin(vec), end(vec), value);
   vec.insert(it, value);
 }
 
+// replacement for std::erase that does not preserves the relative order of
+// the remaining elements. It does this by swapping the element to be erased
+// with the last element.
+// The iterator value is changed in the process, as the value at the current iterator
+// is swapped with the last element.
+// This means you should only process the vector sequentially from the beginning
+// to the end, without incrementing the iterator when calling erase, or you'll skip
+// past the element that was swapped in!!!
+//
+// Example:
+// >	std::vector<int> vec = {1, 2, 3, 4, 5, 6};
+// >	auto it = vec.begin();
+// >	while (it != vec.end()) {
+// >	  if (*it % 2 == 0) {
+// >	    unstable_erase(vec, it); // 2 is swapped with 6, then popped, so we need to reprocess 6 by not incrementing
+// >	  } else {
+// >	    it++;
+// >	  }
+// >	}
+//
 template <template <class T, class... R> class C, class T, class It, class... R>
-auto stable_erase(
-    C<T, R...> &vec,
-    It it) -> decltype(std::declval<std::
-                        enable_if_t<std::disjunction_v<
-                            std::is_same<It, typename C<T, R...>::const_iterator>,
-                            std::is_same<It, typename C<T, R...>::iterator>>, void>>()) {
-  using std::begin;
-  using std::end;
+auto unstable_erase(C<T, R...> &vec, It it)
+    -> decltype(std::declval<std::enable_if_t<
+                    std::disjunction_v<
+                        std::is_same<It, typename C<T, R...>::const_iterator>,
+                        std::is_same<It, typename C<T, R...>::iterator>>,
+                    void>>()) {
   using std::iter_swap;
   auto last =
-      end(vec) - 1; // there must be at least one element since we found one
+      end(vec) -
+      1; // there must be at least one element since we have an iterator on one
   iter_swap(it, last);
   vec.pop_back();
 }
 
 template <template <class T, class... R> class C, class T, class... R>
-auto stable_erase(C<T, R...> &vec, T value) {
+auto unstable_erase(C<T, R...> &vec, T value) {
   using std::begin;
   using std::end;
   using std::iter_swap;
   auto it = std::find(begin(vec), end(vec), value);
+
   if (it != end(vec)) {
     auto last =
         end(vec) - 1; // there must be at least one element since we found one
@@ -137,8 +179,8 @@ std::fstream get_input(std::string filename, int argc, const char **argv) {
   return file;
 }
 
-int atoi(std::string_view str, size_t pos, size_t end) {
-  int result = 0;
+size_t atoi(std::string_view str, size_t pos, size_t end) {
+  size_t result = 0;
   for (size_t i = pos; i < end; ++i) {
     result *= 10;
     result += str[i] - '0';
@@ -160,7 +202,7 @@ range find_range(std::string_view str, const char *pattern, size_t pos) {
 
 bool isValid(range r) { return r.begin != std::string_view::npos; }
 
-std::optional<ranged<int>> next_number(std::string_view str, size_t pos) {
+std::optional<ranged<size_t>> next_number(std::string_view str, size_t pos) {
   auto r = find_range(str, NUMBERS, pos);
   if (isValid(r)) {
     return {{atoi(str, r.begin, r.end), r}};
@@ -178,7 +220,7 @@ std::optional<ranged<std::string_view>> next_word(std::string_view str,
 }
 
 std::ostream &operator<<(std::ostream &os, const range &r) {
-  return os << '[' << r.begin << ".." << r.end << ']';
+  return os << '[' << r.begin << ".." << r.end << ')';
 }
 
 template <class T>

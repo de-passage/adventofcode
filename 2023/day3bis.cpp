@@ -7,7 +7,7 @@
 
 using namespace std;
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char *argv[]) {
   auto input = get_input("day3.txt", argc, argv);
   string line;
   vector<string> lines;

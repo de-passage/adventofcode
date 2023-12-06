@@ -23,7 +23,7 @@ ostream &operator<<(ostream &os, const cube &c) {
 
 struct cubes {
   vector<cube> cubes;
-  int id;
+  size_t id;
 };
 
 cubes parse_cubes(string_view line) {
@@ -88,7 +88,7 @@ bool acceptableCube(const cube &c) {
          c.b >= 0 && c.b <= MAX_VALUES.b;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, const char **argv) {
 
   fstream file = get_input("day2.txt", argc, argv);
   uint64_t sum = 0;
