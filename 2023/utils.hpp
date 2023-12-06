@@ -5,9 +5,10 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <string_view>
-#include <optional>
+#include <type_traits>
 #include <vector>
 
 struct range {
@@ -19,13 +20,11 @@ inline bool operator==(const range &lhs, const range &rhs) {
   return lhs.begin == rhs.begin && lhs.end == rhs.end;
 }
 
-template <>
-struct std::hash<range> {
+template <> struct std::hash<range> {
   size_t operator()(const range &r) const {
     return std::hash<size_t>()(r.begin) ^ (std::hash<size_t>()(r.end) << 1);
   }
 };
-
 
 std::ostream &operator<<(std::ostream &os, const range &r);
 
@@ -33,23 +32,23 @@ template <class T> struct ranged {
   T value;
   range position;
 };
-template<class T>
+template <class T>
 std::ostream &operator<<(std::ostream &os, const ranged<T> &r);
 
 range find_range(std::string_view str, const char *pattern, size_t pos);
-std::optional<ranged<std::string_view>> next_word(std::string_view str, size_t pos = 0);
+std::optional<ranged<std::string_view>> next_word(std::string_view str,
+                                                  size_t pos = 0);
 std::optional<ranged<int>> next_number(std::string_view str, size_t pos = 0);
 bool isValid(range r);
 
 int get_log_level();
 void set_log_level(int level);
 
-template<class T>
-std::ostream &log_(std::ostream &os, const T &r) {
+template <class T> std::ostream &log_(std::ostream &os, const T &r) {
   return os << r;
 }
 
-template<class T, class ...Args>
+template <class T, class... Args>
 std::ostream &log_(std::ostream &os, const std::vector<T, Args...> &v) {
   os << "[ ";
   for (size_t i = 0; i < v.size(); ++i) {
@@ -75,12 +74,42 @@ template <class... Args> void logln(Args &&...args) {
 
 std::fstream get_input(std::string filename, int argc, const char **arg);
 
-
-template<template<class T, class ...R> class C, class T, class ...R>
+template <template <class T, class... R> class C, class T, class... R>
 void sorted_insert(C<T, R...> &vec, T value) {
-  using std::begin; using std::end;
+  using std::begin;
+  using std::end;
   auto it = std::lower_bound(begin(vec), end(vec), value);
   vec.insert(it, value);
+}
+
+template <template <class T, class... R> class C, class T, class It, class... R>
+auto stable_erase(
+    C<T, R...> &vec,
+    It it) -> decltype(std::declval<std::
+                        enable_if_t<std::disjunction_v<
+                            std::is_same<It, typename C<T, R...>::const_iterator>,
+                            std::is_same<It, typename C<T, R...>::iterator>>, void>>()) {
+  using std::begin;
+  using std::end;
+  using std::iter_swap;
+  auto last =
+      end(vec) - 1; // there must be at least one element since we found one
+  iter_swap(it, last);
+  vec.pop_back();
+}
+
+template <template <class T, class... R> class C, class T, class... R>
+auto stable_erase(C<T, R...> &vec, T value) {
+  using std::begin;
+  using std::end;
+  using std::iter_swap;
+  auto it = std::find(begin(vec), end(vec), value);
+  if (it != end(vec)) {
+    auto last =
+        end(vec) - 1; // there must be at least one element since we found one
+    iter_swap(it, last);
+    vec.pop_back();
+  }
 }
 
 #ifdef COMPILE_UTILS
@@ -139,7 +168,8 @@ std::optional<ranged<int>> next_number(std::string_view str, size_t pos) {
   return {};
 }
 
-std::optional<ranged<std::string_view>> next_word(std::string_view str, size_t pos) {
+std::optional<ranged<std::string_view>> next_word(std::string_view str,
+                                                  size_t pos) {
   auto r = find_range(str, LETTERS, pos);
   if (isValid(r)) {
     return {{str.substr(r.begin, r.end - r.begin), r}};
