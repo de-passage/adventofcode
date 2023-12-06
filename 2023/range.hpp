@@ -6,6 +6,7 @@
 #include <vector>
 #include <algorithm>
 #include <optional>
+//#include <iostream>
 
 template<class T, std::enable_if_t<std::is_integral_v<T>, int> =0 >
 struct basic_range {
@@ -24,37 +25,40 @@ struct basic_range {
 
 using range = basic_range<size_t>;
 
-
 template<template<class, class...>class VectorLike, class T, class ...R>
 void range_merge_insert(VectorLike<basic_range<T>> &v, basic_range<T> n) {
+  using namespace std;
   auto it = std::lower_bound(v.begin(), v.end(), n,
                              [](const range &left, const range &right) {
                                return left.begin < right.begin;
                              });
   if (n.begin >= n.end) return ; // empty range
 
-  if (it == v.end()) {
-    v.push_back(n);
-    return;
-  }
-
-  // begin of new interval is contained in the interval before, merge them
-  if (it->begin <= n.begin && n.begin <= it->end) {
-    it->end = std::max(it->end, n.end);
+  if (it > v.begin() && (it - 1)->end > n.begin) {
+    auto prev = it - 1;
+      //std::cout << "merging (overlap) " << *prev << " with " << n << std::endl;
+      prev->end = std::max(prev->end, n.end);
+      it = prev;
+      it->end = std::max(it->end, n.end);
   } else {
+    //std::cout << "no overlap, inserting " << n << std::endl;
     it = v.insert(it, n);
   }
 
+
   auto next = it + 1;
   while (next != v.end()) {
-    if (next->begin > it->begin) {
+    //std::cout << "trying to merge " << *it << " with " << *next << std::endl;
+    if (next->begin >= it->end) {
+      //std::cout << "no overlap" << std::endl;
       // disjointed intervals, we may stop here
       break;
     }
 
     // next->begin overlaps the new range
-    it->end = std::max(it->end, n.end);
-    it->end = next->end;
+    it->end = std::max(it->end, next->end);
+    //std::cout << "merged " << *it << endl;
+
     v.erase(next);
     next = it + 1;
   }
