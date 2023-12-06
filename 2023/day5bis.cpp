@@ -1,39 +1,6 @@
 #include "utils.hpp"
 #include <algorithm>
 
-void range_merge_insert(std::vector<range> &v, range n) {
-  auto it = std::lower_bound(v.begin(), v.end(), n,
-                             [](const range &left, const range &right) {
-                               return left.begin < right.begin;
-                             });
-  if (n.begin >= n.end) return ; // empty range
-  if (it == v.end()) {
-    v.push_back(n);
-    return;
-  }
-
-  // begin of new interval is contained in the interval before, merge them
-  if (it->begin <= n.begin && n.begin <= it->end) {
-    it->end = std::max(it->end, n.end);
-  } else {
-    it = v.insert(it, n);
-  }
-
-  auto next = it + 1;
-  while (next != v.end()) {
-    if (next->begin > it->begin) {
-      // disjointed intervals, we may stop here
-      break;
-    }
-
-    // next->begin overlaps the new range
-    it->end = std::max(it->end, n.end);
-    it->end = next->end;
-    v.erase(next);
-    next = it + 1;
-  }
-}
-
 int main(int argc, const char **argv) {
   using namespace std;
 

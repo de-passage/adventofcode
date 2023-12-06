@@ -25,6 +25,11 @@ CFLAGS = $(shell cat compile_flags.txt)
 # Specify the linker flags
 LDFLAGS =
 
+test: test.cpp
+	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS)
+	./test
+	@echo "Test passed successfully!"
+
 # Target for the executable
 %: %.cpp
 		$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS)

@@ -12,40 +12,7 @@
 #include <string_view>
 #include <type_traits>
 #include <vector>
-
-struct range {
-  size_t begin;
-  size_t end;
-
-  inline constexpr size_t size() const { return end - begin; }
-  inline constexpr bool contains(size_t pos) const {
-    return pos >= begin && pos < end;
-  }
-  inline constexpr bool contains(range r) const {
-    return r.begin >= begin && r.end <= end;
-  }
-};
-
-inline constexpr std::optional<range> combine(range left, range right) {
-  if (right.begin >= left.begin && right.begin <= left.end) {
-    return {{left.begin, std::max(left.end, right.end)}};
-  } else if (right.end >= left.begin && right.end <= left.end) {
-    return {{std::min(left.begin, right.begin), left.end}};
-  }
-  return {};
-}
-
-inline bool operator==(const range &lhs, const range &rhs) {
-  return lhs.begin == rhs.begin && lhs.end == rhs.end;
-}
-
-template <> struct std::hash<range> {
-  size_t operator()(const range &r) const {
-    return std::hash<size_t>()(r.begin) ^ (std::hash<size_t>()(r.end) << 1);
-  }
-};
-
-std::ostream &operator<<(std::ostream &os, const range &r);
+#include "range.hpp"
 
 template <class T> struct ranged {
   T value;
@@ -217,10 +184,6 @@ std::optional<ranged<std::string_view>> next_word(std::string_view str,
     return {{str.substr(r.begin, r.end - r.begin), r}};
   }
   return {};
-}
-
-std::ostream &operator<<(std::ostream &os, const range &r) {
-  return os << '[' << r.begin << ".." << r.end << ')';
 }
 
 template <class T>
