@@ -223,11 +223,44 @@ void poker__ordering_test() {
 }
 
 
+void extrude_test() {
+  LOG(auto result1 = extrude(range{0, 10}, range{0, 10}));
+  TEST(result1.left, ==, (range{0, 0}));
+  TEST(result1.right, ==, (range{10, 10}));
+  TEST(result1.extruded, ==, (range{0, 10}));
+
+  LOG(auto result2 = extrude(range{0, 10}, range{0, 5}));
+  TEST(result2.left, ==, (range{0, 0}));
+  TEST(result2.right, ==, (range{5, 10}));
+  TEST(result2.extruded, ==, (range{0, 5}));
+
+  LOG(auto result3 = extrude(range{0, 10}, range{5, 10}));
+  TEST(result3.left, ==, (range{0, 5}));
+  TEST(result3.right, ==, (range{10, 10}));
+  TEST(result3.extruded, ==, (range{5, 10}));
+
+  LOG(auto result4 = extrude(range{0, 10}, range{5, 15}));
+  TEST(result4.left, ==, (range{0, 5}));
+  TEST(result4.right, ==, (range{10, 15}));
+
+  LOG(auto result5 = extrude(range{0, 10}, range{15, 20}));
+  TEST(result5.left, ==, (range{0, 0}));
+  TEST(result5.right, ==, (range{10, 10}));
+  TEST(result5.extruded, ==, (range{0, 0}));
+
+  LOG(auto result6 = extrude(range{5, 10}, range{0, 15}));
+  TEST(result6.left, ==, (range{5, 5}));
+  TEST(result6.right, ==, (range{10, 10}));
+  TEST(result6.extruded, ==, (range{5, 10}));
+
+}
+
 int main() {
   LOG(range_merge_insert_test());
   LOG(combine_ints_test());
   LOG(poker__make_hand_test());
   LOG(poker__parse_hand_test());
   LOG(poker__ordering_test());
+  LOG(extrude_test());
   return 0;
 }
