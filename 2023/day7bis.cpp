@@ -2,7 +2,7 @@
 #include "poker.hpp"
 
 using namespace std;
-using namespace poker_1;
+using namespace poker_2;
 
 struct play {
   hand h;
@@ -14,7 +14,18 @@ bool operator<(const play &a, const play &b) {
 }
 
 ostream& operator<<(ostream& os, const play& p) {
-  return os << '{' << p.h << " | " << p.bid << '}';
+  os << '{' << p.h << " | ";
+  for (int i =0; i < 5; ++i) {
+    switch(p.h.order[i]) {
+      case 0: os << 'J'; break;
+      case 10: os << 'T'; break;
+      case 11: os << 'Q'; break;
+      case 12: os << 'K'; break;
+      case 13: os << 'A'; break;
+      default: os << (p.h.order[i]);
+    }
+  }
+  return os << " | " << p.bid << '}';
 }
 
 int main(int argc, const char **argv) {
@@ -26,8 +37,9 @@ int main(int argc, const char **argv) {
     auto h = line.substr(0, 5);
     auto bid = next_number(line, 5);
     if (bid) {
-      sorted_insert(plays, play{.h= parse_hand(h), .bid = bid->value});
-      logln("plays: ", plays);
+      auto p = play{.h= parse_hand(h), .bid = bid->value};
+      logln("line: ", line, " -> ", p);
+      sorted_insert(plays, p);
     } else {
       cerr << "Failed to parse line: " << line << endl;
     }

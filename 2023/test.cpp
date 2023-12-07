@@ -81,6 +81,7 @@ void combine_ints_test() {
 }
 
 void poker__make_hand_test() {
+  using namespace poker_1;
   LOG(hand h = make_hand((int[5]){1, 2, 3, 4, 5}));
   TEST(h.cards[0].value, ==, 5);
   TEST(h.cards[1].value, ==, 4);
@@ -155,6 +156,7 @@ void poker__make_hand_test() {
 }
 
 void poker__parse_hand_test() {
+  using namespace poker_1;
   hand h = parse_hand("12345");
   TEST(h, ==, make_hand((int[5]){1, 2, 3, 4, 5}));
   TEST(h.cards[0].value, ==, 5);
@@ -234,6 +236,7 @@ void poker__parse_hand_test() {
 }
 
 void poker__ordering_test() {
+  using namespace poker_1;
   TEST(parse_hand("11111"), >, parse_hand("11112"));
   TEST(parse_hand("11112"), <, parse_hand("11113"));
   TEST(parse_hand("11122"), <, parse_hand("11111"));
