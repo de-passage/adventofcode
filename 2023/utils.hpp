@@ -192,4 +192,13 @@ std::ostream &operator<<(std::ostream &os, const ranged<T> &r) {
 }
 #endif
 
+inline size_t combine_ints(size_t left, size_t right) {
+  size_t t = right;
+  while (t > 0) {
+    left*=10;
+    t /= 10;
+  }
+  return left + right;
+}
+
 #endif // HEADER_GUARD_UTILS_HPP

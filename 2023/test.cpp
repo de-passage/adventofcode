@@ -71,7 +71,13 @@ void range_merge_insert_test() {
   TEST(ranges_actual, ==, make_vec(range{0, 19}));
 }
 
+void combine_ints_test() {
+  TEST(combine_ints(1, 2), ==, 12);
+  TEST(combine_ints(10, 2), ==, 102);
+  TEST(combine_ints(1, 20), ==, 120);
+}
 int main() {
   range_merge_insert_test();
+  combine_ints_test();
   return 0;
 }
