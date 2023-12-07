@@ -26,6 +26,7 @@ int main(int argc, const char **argv) {
     auto bid = next_number(line, 5);
     if (bid) {
       sorted_insert(plays, play{.h= parse_hand(h), .bid = bid->value});
+      logln("plays: ", plays);
     } else {
       cerr << "Failed to parse line: " << line << endl;
     }

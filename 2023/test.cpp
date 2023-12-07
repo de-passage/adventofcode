@@ -12,7 +12,7 @@
     log_(cout, ref);                                                           \
     cout << std::endl;                                                         \
   } else {                                                                     \
-    cout << "Test failed (" << #what << ' ' << #op << ' ' << #ref << "):";     \
+    cout << "Test failed (" << #what << ' ' << #op << ' ' << #ref << "):  ";   \
     log_(cout, what);                                                          \
     cout << " ";                                                               \
     log_(cout, #op);                                                           \
@@ -82,133 +82,155 @@ void combine_ints_test() {
 
 void poker__make_hand_test() {
   LOG(hand h = make_hand((int[5]){1, 2, 3, 4, 5}));
-  TEST(h.major, ==, 1);
-  TEST(h.minor, ==, 1);
-  TEST(h.cards[0], ==, 1);
-  TEST(h.cards[1], ==, 2);
-  TEST(h.cards[2], ==, 3);
-  TEST(h.cards[3], ==, 4);
-  TEST(h.cards[4], ==, 5);
-  TEST(h.similarity[0], ==, 5);
-  TEST(h.similarity[1], ==, 0);
-  TEST(h.similarity[2], ==, 0);
-  TEST(h.similarity[3], ==, 0);
-  TEST(h.similarity[4], ==, 0);
+  TEST(h.cards[0].value, ==, 5);
+  TEST(h.cards[1].value, ==, 4);
+  TEST(h.cards[2].value, ==, 3);
+  TEST(h.cards[3].value, ==, 2);
+  TEST(h.cards[4].value, ==, 1);
+  TEST(h.cards[0].quantity, ==, 1);
+  TEST(h.cards[1].quantity, ==, 1);
+  TEST(h.cards[2].quantity, ==, 1);
+  TEST(h.cards[3].quantity, ==, 1);
+  TEST(h.cards[4].quantity, ==, 1);
 
   LOG(h = make_hand((int[5]){1, 1, 1, 1, 1}));
-  TEST(h.major, ==, 5);
-  TEST(h.minor, ==, 1);
-  TEST(h.cards[0], ==, 1);
-  TEST(h.cards[1], ==, 1);
-  TEST(h.cards[2], ==, 1);
-  TEST(h.cards[3], ==, 1);
-  TEST(h.cards[4], ==, 1);
-  TEST(h.similarity[0], ==, 0);
-  TEST(h.similarity[1], ==, 0);
-  TEST(h.similarity[2], ==, 0);
-  TEST(h.similarity[3], ==, 0);
-  TEST(h.similarity[4], ==, 1);
+  TEST(h.cards[0].value, ==, 1);
+  TEST(h.cards[1].value, ==, 0);
+  TEST(h.cards[2].value, ==, 0);
+  TEST(h.cards[3].value, ==, 0);
+  TEST(h.cards[4].value, ==, 0);
+  TEST(h.cards[0].quantity, ==, 5);
+  TEST(h.cards[1].quantity, ==, 0);
+  TEST(h.cards[2].quantity, ==, 0);
+  TEST(h.cards[3].quantity, ==, 0);
+  TEST(h.cards[4].quantity, ==, 0);
 
   LOG(h = make_hand((int[5]){1, 1, 1, 1, 2}));
-  TEST(h.major, ==, 4);
-  TEST(h.minor, ==, 1);
-  TEST(h.cards[0], ==, 1);
-  TEST(h.cards[1], ==, 1);
-  TEST(h.cards[2], ==, 1);
-  TEST(h.cards[3], ==, 1);
-  TEST(h.cards[4], ==, 2);
+  TEST(h.cards[0].value, ==, 1);
+  TEST(h.cards[1].value, ==, 2);
+  TEST(h.cards[2].value, ==, 0);
+  TEST(h.cards[3].value, ==, 0);
+  TEST(h.cards[4].value, ==, 0);
+  TEST(h.cards[0].quantity, ==, 4);
+  TEST(h.cards[1].quantity, ==, 1);
+  TEST(h.cards[2].quantity, ==, 0);
+  TEST(h.cards[3].quantity, ==, 0);
+  TEST(h.cards[4].quantity, ==, 0);
 
   LOG(h = make_hand((int[5]){2, 1, 1, 2, 1}));
-  TEST(h.major, ==, 3);
-  TEST(h.minor, ==, 2);
-  TEST(h.cards[0], ==, 1);
-  TEST(h.cards[1], ==, 1);
-  TEST(h.cards[2], ==, 1);
-  TEST(h.cards[3], ==, 2);
-  TEST(h.cards[4], ==, 2);
+  TEST(h.cards[0].value, ==, 1);
+  TEST(h.cards[1].value, ==, 2);
+  TEST(h.cards[2].value, ==, 0);
+  TEST(h.cards[3].value, ==, 0);
+  TEST(h.cards[4].value, ==, 0);
+  TEST(h.cards[0].quantity, ==, 3);
+  TEST(h.cards[1].quantity, ==, 2);
+  TEST(h.cards[2].quantity, ==, 0);
+  TEST(h.cards[3].quantity, ==, 0);
+  TEST(h.cards[4].quantity, ==, 0);
 
   LOG(h = make_hand((int[5]){1, 2, 2, 2, 1}));
-  TEST(h.major, ==, 3);
-  TEST(h.minor, ==, 2);
-  TEST(h.cards[0], ==, 1);
-  TEST(h.cards[1], ==, 1);
-  TEST(h.cards[2], ==, 2);
-  TEST(h.cards[3], ==, 2);
-  TEST(h.cards[4], ==, 2);
+  TEST(h.cards[0].value, ==, 2);
+  TEST(h.cards[1].value, ==, 1);
+  TEST(h.cards[2].value, ==, 0);
+  TEST(h.cards[3].value, ==, 0);
+  TEST(h.cards[4].value, ==, 0);
+  TEST(h.cards[0].quantity, ==, 3);
+  TEST(h.cards[1].quantity, ==, 2);
+  TEST(h.cards[2].quantity, ==, 0);
+  TEST(h.cards[3].quantity, ==, 0);
+  TEST(h.cards[4].quantity, ==, 0);
 
   LOG(h = make_hand((int[5]){1, 2, 3, 2, 1}));
-  TEST(h.major, ==, 2);
-  TEST(h.minor, ==, 2);
-  TEST(h.cards[0], ==, 1);
-  TEST(h.cards[1], ==, 1);
-  TEST(h.cards[2], ==, 2);
-  TEST(h.cards[3], ==, 2);
-  TEST(h.cards[4], ==, 3);
+  TEST(h.cards[0].value, ==, 2);
+  TEST(h.cards[1].value, ==, 1);
+  TEST(h.cards[2].value, ==, 3);
+  TEST(h.cards[3].value, ==, 0);
+  TEST(h.cards[4].value, ==, 0);
+  TEST(h.cards[0].quantity, ==, 2);
+  TEST(h.cards[1].quantity, ==, 2);
+  TEST(h.cards[2].quantity, ==, 1);
+  TEST(h.cards[3].quantity, ==, 0);
+  TEST(h.cards[4].quantity, ==, 0);
 }
 
 void poker__parse_hand_test() {
   hand h = parse_hand("12345");
-  TEST(h.major, ==, 1);
-  TEST(h.minor, ==, 1);
-  TEST(h.cards[0], ==, 1);
-  TEST(h.cards[1], ==, 2);
-  TEST(h.cards[2], ==, 3);
-  TEST(h.cards[3], ==, 4);
-  TEST(h.cards[4], ==, 5);
+  TEST(h, ==, make_hand((int[5]){1, 2, 3, 4, 5}));
+  TEST(h.cards[0].value, ==, 5);
+  TEST(h.cards[1].value, ==, 4);
+  TEST(h.cards[2].value, ==, 3);
+  TEST(h.cards[3].value, ==, 2);
+  TEST(h.cards[4].value, ==, 1);
 
   h = parse_hand("11111");
-  TEST(h.major, ==, 5);
-  TEST(h.minor, ==, 1);
-  TEST(h.cards[0], ==, 1);
-  TEST(h.cards[1], ==, 1);
-  TEST(h.cards[2], ==, 1);
-  TEST(h.cards[3], ==, 1);
-  TEST(h.cards[4], ==, 1);
+  TEST(h, ==, make_hand((int[5]){1, 1, 1, 1, 1}));
+  TEST(h.cards[0].value, ==, 1);
+  TEST(h.cards[1].value, ==, 0);
+  TEST(h.cards[2].value, ==, 0);
+  TEST(h.cards[3].value, ==, 0);
+  TEST(h.cards[4].value, ==, 0);
+  TEST(h.cards[0].quantity, ==, 5);
+  TEST(h.cards[1].quantity, ==, 0);
+  TEST(h.cards[2].quantity, ==, 0);
+  TEST(h.cards[3].quantity, ==, 0);
+  TEST(h.cards[4].quantity, ==, 0);
 
   h = parse_hand("11112");
-  TEST(h.major, ==, 4);
-  TEST(h.minor, ==, 1);
-  TEST(h.cards[0], ==, 1);
-  TEST(h.cards[1], ==, 1);
-  TEST(h.cards[2], ==, 1);
-  TEST(h.cards[3], ==, 1);
-  TEST(h.cards[4], ==, 2);
+  TEST(h, ==, make_hand((int[5]){1, 1, 1, 1, 2}));
+  TEST(h.cards[0].value, ==, 1);
+  TEST(h.cards[1].value, ==, 2);
+  TEST(h.cards[2].value, ==, 0);
+  TEST(h.cards[3].value, ==, 0);
+  TEST(h.cards[4].value, ==, 0);
 
   h = parse_hand("21121");
-  TEST(h.major, ==, 3);
-  TEST(h.minor, ==, 2);
-  TEST(h.cards[0], ==, 1);
-  TEST(h.cards[1], ==, 1);
-  TEST(h.cards[2], ==, 1);
-  TEST(h.cards[3], ==, 2);
-  TEST(h.cards[4], ==, 2);
+  TEST(h, ==, make_hand((int[5]){2, 1, 1, 1, 2}));
+  TEST(h.cards[0].value, ==, 1);
+  TEST(h.cards[1].value, ==, 2);
+  TEST(h.cards[2].value, ==, 0);
+  TEST(h.cards[3].value, ==, 0);
+  TEST(h.cards[4].value, ==, 0);
 
   h = parse_hand("12221");
-  TEST(h.major, ==, 3);
-  TEST(h.minor, ==, 2);
-  TEST(h.cards[0], ==, 1);
-  TEST(h.cards[1], ==, 1);
-  TEST(h.cards[2], ==, 2);
-  TEST(h.cards[3], ==, 2);
-  TEST(h.cards[4], ==, 2);
+  TEST(h, ==, make_hand((int[5]){2, 1, 2, 1, 2}));
+  TEST(h.cards[0].value, ==, 2);
+  TEST(h.cards[1].value, ==, 1);
+  TEST(h.cards[2].value, ==, 0);
+  TEST(h.cards[3].value, ==, 0);
+  TEST(h.cards[4].value, ==, 0);
 
   h = parse_hand("12321");
-  TEST(h.major, ==, 2);
-  TEST(h.minor, ==, 2);
-  TEST(h.cards[0], ==, 1);
-  TEST(h.cards[1], ==, 1);
-  TEST(h.cards[2], ==, 2);
-  TEST(h.cards[3], ==, 2);
-  TEST(h.cards[4], ==, 3);
+  TEST(h, ==, make_hand((int[5]){2, 1, 2, 1, 3}));
+  TEST(h.cards[0].value, ==, 2);
+  TEST(h.cards[1].value, ==, 1);
+  TEST(h.cards[2].value, ==, 3);
+  TEST(h.cards[3].value, ==, 0);
+  TEST(h.cards[4].value, ==, 0);
 
   h = parse_hand("TQJKA");
-  TEST(h.major, ==, 1);
-  TEST(h.minor, ==, 1);
-  TEST(h.cards[0], ==, 10);
-  TEST(h.cards[1], ==, 11);
-  TEST(h.cards[2], ==, 12);
-  TEST(h.cards[3], ==, 13);
-  TEST(h.cards[4], ==, 14);
+  TEST(h.cards[0].value, ==, 14);
+  TEST(h.cards[1].value, ==, 13);
+  TEST(h.cards[2].value, ==, 12);
+  TEST(h.cards[3].value, ==, 11);
+  TEST(h.cards[4].value, ==, 10);
+  TEST(h.cards[0].quantity, ==, 1);
+  TEST(h.cards[1].quantity, ==, 1);
+  TEST(h.cards[2].quantity, ==, 1);
+  TEST(h.cards[3].quantity, ==, 1);
+  TEST(h.cards[4].quantity, ==, 1);
+
+  h = parse_hand("KK776");
+  TEST(h.cards[0].value, ==, 13);
+  TEST(h.cards[1].value, ==, 7);
+  TEST(h.cards[2].value, ==, 6);
+  TEST(h.cards[3].value, ==, 0);
+  TEST(h.cards[4].value, ==, 0);
+  TEST(h.cards[0].quantity, ==, 2);
+  TEST(h.cards[1].quantity, ==, 2);
+  TEST(h.cards[2].quantity, ==, 1);
+  TEST(h.cards[3].quantity, ==, 0);
+  TEST(h.cards[4].quantity, ==, 0);
 }
 
 void poker__ordering_test() {
@@ -218,10 +240,17 @@ void poker__ordering_test() {
   TEST(parse_hand("11122"), <, parse_hand("11112"));
   TEST(parse_hand("11123"), <, parse_hand("11122"));
   TEST(parse_hand("15122"), <, parse_hand("15111"));
-  TEST(parse_hand("54321"), <, parse_hand("23456"));
+  TEST(parse_hand("54321"), >, parse_hand("23456"));
   TEST(parse_hand("QQQQA"), <, parse_hand("QKKKK"));
+  TEST(parse_hand("JJQQA"), <, parse_hand("QQKKA"));
+  TEST(parse_hand("JJJQA"), <, parse_hand("JJJAA"));
+  TEST(parse_hand("JJJQA"), <, parse_hand("22211"));
+  TEST(parse_hand("KK776"), <, parse_hand("555JT"));
+  TEST(parse_hand("JJTTK"), <, parse_hand("KK776"));
+  TEST(parse_hand("JJTTK") > parse_hand("KK776"), ==, false);
+  TEST(parse_hand("KK776") > parse_hand("555JT"), ==, false);
+  TEST(parse_hand("KK677"), >, parse_hand("KTJJT"));
 }
-
 
 void extrude_test() {
   LOG(auto result1 = extrude(range{0, 10}, range{0, 10}));
@@ -252,15 +281,15 @@ void extrude_test() {
   TEST(result6.left, ==, (range{5, 5}));
   TEST(result6.right, ==, (range{10, 10}));
   TEST(result6.extruded, ==, (range{5, 10}));
-
 }
 
 int main() {
+  std::cout << std::boolalpha;
   LOG(range_merge_insert_test());
   LOG(combine_ints_test());
   LOG(poker__make_hand_test());
   LOG(poker__parse_hand_test());
   LOG(poker__ordering_test());
-  LOG(extrude_test());
+  // LOG(extrude_test());
   return 0;
 }

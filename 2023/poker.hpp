@@ -4,53 +4,52 @@
 #include <algorithm>
 #include <cstring>
 
-struct hand {
-  int major; // Highest number of similar cards
-  int minor; // Second highest number of similar cards
-  int cards[5]; // Sorted number of cards
-  int similarity[5]; // Value of similar cards
-};
-
 #include <iostream>
+
+struct hand {
+  struct  {
+    size_t value;
+    size_t quantity;
+
+    constexpr friend bool operator==(const auto &a, const auto& b) {
+      return a.value == b.value && a.quantity == b.quantity;
+    }
+
+    constexpr friend std::ostream& operator<<(std::ostream& os, const auto& c) {
+      return os << '{' << c.value << ", " << c.quantity << '}';
+    }
+
+    constexpr friend bool operator<(const auto &a, const auto& b) {
+      return a.quantity < b.quantity || (a.quantity == b.quantity && a.value < b.value);
+    }
+
+    constexpr friend bool operator>(const auto &a, const auto& b) {
+      return b < a;
+    }
+  } cards[5];
+  int order[5];
+};
 
 hand make_hand(int cards[5]) {
   hand h;
-  std::memset(h.similarity, 0, sizeof(h.similarity));
-  std::memcpy(h.cards, cards, sizeof(h.cards));
-  std::sort(h.cards, h.cards + 5);
-  h.major = 1;
-  h.minor = 1;
-  int current_major = h.cards[0];
-  for (int i = 0; i < 5; i++) {
-    int this_value = 1;
+  std::memcpy(h.order, cards, sizeof(h.order));
+  std::memset(h.cards, 0, sizeof(h.cards));
+  std::sort(cards, cards + 5);
+  size_t last = cards[0];
+  size_t acc = 0;
+  size_t idx = 0;
 
-    for (int j = i + 1; j < 5; j++) {
-      this_value += h.cards[i] == h.cards[j];
-    }
-
-    if (h.similarity[this_value - 1] < h.cards[i]) {
-      bool already_set = false;
-      for (int j = this_value; j < 5; j++) {
-        if (h.similarity[j] == h.cards[i]) {
-          already_set = true;
-          break;
-        }
-      }
-      if (!already_set) {
-        h.similarity[this_value - 1] = h.cards[i];
-      }
-    }
-
-    if (this_value > h.major) {
-      if (h.cards[i] != current_major) {
-        h.minor = h.major;
-        current_major = h.cards[i];
-      }
-      h.major = this_value;
-    } else if (this_value > h.minor && h.cards[i] != current_major) {
-      h.minor = this_value;
+  for (size_t i = 0; i < 5; i++) {
+    if ((size_t)cards[i] == last) {
+      acc++;
+    } else {
+      h.cards[idx++] = {.value = last, .quantity=acc};
+      last = cards[i];
+      acc = 1;
     }
   }
+  h.cards[idx++] = {last, acc};
+  std::sort(h.cards, h.cards + 5, std::greater<>());
   return h;
 }
 
@@ -82,25 +81,29 @@ hand parse_hand(std::string_view s) {
 
 std::ostream& operator<<(std::ostream& os, const hand& h) {
   os << '<';
-  for (int i = 0; i < 5; i++) {
-    switch (h.cards[i]) {
-      case 14:
-        os << 'A';
-        break;
-      case 13:
-        os << 'K';
-        break;
-      case 12:
-        os << 'Q';
-        break;
-      case 11:
-        os << 'J';
-        break;
-      case 10:
-        os << 'T';
-        break;
-      default:
-        os << h.cards[i];
+  for (int i = 0; i < 5 && h.cards[i].quantity > 0; i++) {
+    auto value = h.cards[i].value;
+    auto quantity = h.cards[i].quantity;
+    for (size_t j = 0; j < quantity; ++j) {
+      switch (value) {
+        case 14:
+          os << 'A';
+          break;
+        case 13:
+          os << 'K';
+          break;
+        case 12:
+          os << 'Q';
+          break;
+        case 11:
+          os << 'J';
+          break;
+        case 10:
+          os << 'T';
+          break;
+        default:
+          os << value;
+      }
     }
   }
   return os << '>';
@@ -111,10 +114,17 @@ hand parse_hand(const char s[6]) {
 }
 
 bool operator<(const hand &a, const hand &b) {
-  for (int i = 4; i >= 0; --i) {
-    if (a.similarity[i] < b.similarity[i]) {
+  for (int i = 0; i < 5; ++i) {
+    if (a.cards[i].quantity < b.cards[i].quantity) {
       return true;
-    } else if (a.similarity[i] > b.similarity[i]) {
+    } else if (a.cards[i].quantity > b.cards[i].quantity) {
+      return false;
+    }
+  }
+  for (int i = 0; i < 5; ++i) {
+    if (a.order[i] < b.order[i]) {
+      return true;
+    } else if (a.order[i] > b.order[i]) {
       return false;
     }
   }
@@ -122,11 +132,25 @@ bool operator<(const hand &a, const hand &b) {
 }
 
 bool operator>(const hand &a, const hand &b) {
-  return b < a;
+  for (int i = 0; i < 5; ++i) {
+    if (a.cards[i].quantity > b.cards[i].quantity) {
+      return true;
+    } else if (a.cards[i].quantity < b.cards[i].quantity) {
+      return false;
+    }
+  }
+  for (int i = 0; i < 5; ++i) {
+    if (a.order[i] > b.order[i]) {
+      return true;
+    } else if (a.order[i] < b.order[i]) {
+      return false;
+    }
+  }
+  return false;
 }
 
 bool operator==(const hand &a, const hand &b) {
-  return std::equal(a.similarity, a.similarity + 5, b.similarity);
+  return std::equal(a.cards, a.cards + 5, b.cards);
 }
 
 
