@@ -1,3 +1,4 @@
+#include "poker.hpp"
 #include "utils.hpp"
 
 #define TEST(what, op, ref)                                                    \
@@ -8,21 +9,21 @@
     cout << " ";                                                               \
     log_(cout, #op);                                                           \
     cout << " ";                                                               \
-    log_(cout, ref);                                                          \
+    log_(cout, ref);                                                           \
     cout << std::endl;                                                         \
   } else {                                                                     \
-    log_(cout, "Test failed: ");                                               \
+    cout << "Test failed (" << #what << ' ' << #op << ' ' << #ref << "):";     \
     log_(cout, what);                                                          \
     cout << " ";                                                               \
     log_(cout, #op);                                                           \
     cout << " ";                                                               \
-    log_(cout, ref);                                                          \
+    log_(cout, ref);                                                           \
     cout << std::endl;                                                         \
     exit(1);                                                                   \
   }
 
-#define LOG(what) \
-  std::cout << #what << std::endl;\
+#define LOG(what)                                                              \
+  std::cout << #what << std::endl;                                             \
   what;
 
 using namespace std;
@@ -50,10 +51,12 @@ void range_merge_insert_test() {
   TEST(ranges_actual, ==, make_vec(range{1, 3}, range{4, 5}, range{8, 10}));
 
   LOG(range_merge_insert(ranges_actual, range{7, 8}));
-  TEST(ranges_actual, ==, make_vec(range{1, 3}, range{4, 5}, range{7, 8}, range{8, 10}));
+  TEST(ranges_actual, ==,
+       make_vec(range{1, 3}, range{4, 5}, range{7, 8}, range{8, 10}));
 
   LOG(range_merge_insert(ranges_actual, range{8, 15}));
-  TEST(ranges_actual, ==, make_vec(range{1, 3}, range{4, 5}, range{7, 8}, range{8, 15}));
+  TEST(ranges_actual, ==,
+       make_vec(range{1, 3}, range{4, 5}, range{7, 8}, range{8, 15}));
 
   LOG(range_merge_insert(ranges_actual, range{2, 8}));
   TEST(ranges_actual, ==, make_vec(range{1, 8}, range{8, 15}));
@@ -76,8 +79,155 @@ void combine_ints_test() {
   TEST(combine_ints(10, 2), ==, 102);
   TEST(combine_ints(1, 20), ==, 120);
 }
+
+void poker__make_hand_test() {
+  LOG(hand h = make_hand((int[5]){1, 2, 3, 4, 5}));
+  TEST(h.major, ==, 1);
+  TEST(h.minor, ==, 1);
+  TEST(h.cards[0], ==, 1);
+  TEST(h.cards[1], ==, 2);
+  TEST(h.cards[2], ==, 3);
+  TEST(h.cards[3], ==, 4);
+  TEST(h.cards[4], ==, 5);
+  TEST(h.similarity[0], ==, 5);
+  TEST(h.similarity[1], ==, 0);
+  TEST(h.similarity[2], ==, 0);
+  TEST(h.similarity[3], ==, 0);
+  TEST(h.similarity[4], ==, 0);
+
+  LOG(h = make_hand((int[5]){1, 1, 1, 1, 1}));
+  TEST(h.major, ==, 5);
+  TEST(h.minor, ==, 1);
+  TEST(h.cards[0], ==, 1);
+  TEST(h.cards[1], ==, 1);
+  TEST(h.cards[2], ==, 1);
+  TEST(h.cards[3], ==, 1);
+  TEST(h.cards[4], ==, 1);
+  TEST(h.similarity[0], ==, 0);
+  TEST(h.similarity[1], ==, 0);
+  TEST(h.similarity[2], ==, 0);
+  TEST(h.similarity[3], ==, 0);
+  TEST(h.similarity[4], ==, 1);
+
+  LOG(h = make_hand((int[5]){1, 1, 1, 1, 2}));
+  TEST(h.major, ==, 4);
+  TEST(h.minor, ==, 1);
+  TEST(h.cards[0], ==, 1);
+  TEST(h.cards[1], ==, 1);
+  TEST(h.cards[2], ==, 1);
+  TEST(h.cards[3], ==, 1);
+  TEST(h.cards[4], ==, 2);
+
+  LOG(h = make_hand((int[5]){2, 1, 1, 2, 1}));
+  TEST(h.major, ==, 3);
+  TEST(h.minor, ==, 2);
+  TEST(h.cards[0], ==, 1);
+  TEST(h.cards[1], ==, 1);
+  TEST(h.cards[2], ==, 1);
+  TEST(h.cards[3], ==, 2);
+  TEST(h.cards[4], ==, 2);
+
+  LOG(h = make_hand((int[5]){1, 2, 2, 2, 1}));
+  TEST(h.major, ==, 3);
+  TEST(h.minor, ==, 2);
+  TEST(h.cards[0], ==, 1);
+  TEST(h.cards[1], ==, 1);
+  TEST(h.cards[2], ==, 2);
+  TEST(h.cards[3], ==, 2);
+  TEST(h.cards[4], ==, 2);
+
+  LOG(h = make_hand((int[5]){1, 2, 3, 2, 1}));
+  TEST(h.major, ==, 2);
+  TEST(h.minor, ==, 2);
+  TEST(h.cards[0], ==, 1);
+  TEST(h.cards[1], ==, 1);
+  TEST(h.cards[2], ==, 2);
+  TEST(h.cards[3], ==, 2);
+  TEST(h.cards[4], ==, 3);
+}
+
+void poker__parse_hand_test() {
+  hand h = parse_hand("12345");
+  TEST(h.major, ==, 1);
+  TEST(h.minor, ==, 1);
+  TEST(h.cards[0], ==, 1);
+  TEST(h.cards[1], ==, 2);
+  TEST(h.cards[2], ==, 3);
+  TEST(h.cards[3], ==, 4);
+  TEST(h.cards[4], ==, 5);
+
+  h = parse_hand("11111");
+  TEST(h.major, ==, 5);
+  TEST(h.minor, ==, 1);
+  TEST(h.cards[0], ==, 1);
+  TEST(h.cards[1], ==, 1);
+  TEST(h.cards[2], ==, 1);
+  TEST(h.cards[3], ==, 1);
+  TEST(h.cards[4], ==, 1);
+
+  h = parse_hand("11112");
+  TEST(h.major, ==, 4);
+  TEST(h.minor, ==, 1);
+  TEST(h.cards[0], ==, 1);
+  TEST(h.cards[1], ==, 1);
+  TEST(h.cards[2], ==, 1);
+  TEST(h.cards[3], ==, 1);
+  TEST(h.cards[4], ==, 2);
+
+  h = parse_hand("21121");
+  TEST(h.major, ==, 3);
+  TEST(h.minor, ==, 2);
+  TEST(h.cards[0], ==, 1);
+  TEST(h.cards[1], ==, 1);
+  TEST(h.cards[2], ==, 1);
+  TEST(h.cards[3], ==, 2);
+  TEST(h.cards[4], ==, 2);
+
+  h = parse_hand("12221");
+  TEST(h.major, ==, 3);
+  TEST(h.minor, ==, 2);
+  TEST(h.cards[0], ==, 1);
+  TEST(h.cards[1], ==, 1);
+  TEST(h.cards[2], ==, 2);
+  TEST(h.cards[3], ==, 2);
+  TEST(h.cards[4], ==, 2);
+
+  h = parse_hand("12321");
+  TEST(h.major, ==, 2);
+  TEST(h.minor, ==, 2);
+  TEST(h.cards[0], ==, 1);
+  TEST(h.cards[1], ==, 1);
+  TEST(h.cards[2], ==, 2);
+  TEST(h.cards[3], ==, 2);
+  TEST(h.cards[4], ==, 3);
+
+  h = parse_hand("TQJKA");
+  TEST(h.major, ==, 1);
+  TEST(h.minor, ==, 1);
+  TEST(h.cards[0], ==, 10);
+  TEST(h.cards[1], ==, 11);
+  TEST(h.cards[2], ==, 12);
+  TEST(h.cards[3], ==, 13);
+  TEST(h.cards[4], ==, 14);
+}
+
+void poker__ordering_test() {
+  TEST(parse_hand("11111"), >, parse_hand("11112"));
+  TEST(parse_hand("11112"), <, parse_hand("11113"));
+  TEST(parse_hand("11122"), <, parse_hand("11111"));
+  TEST(parse_hand("11122"), <, parse_hand("11112"));
+  TEST(parse_hand("11123"), <, parse_hand("11122"));
+  TEST(parse_hand("15122"), <, parse_hand("15111"));
+  TEST(parse_hand("54321"), <, parse_hand("23456"));
+  TEST(parse_hand("QQQQA"), <, parse_hand("QKKKK"));
+}
+
+
 int main() {
-  range_merge_insert_test();
-  combine_ints_test();
+  LOG(range_merge_insert_test());
+  LOG(combine_ints_test());
+  LOG(poker__make_hand_test());
+  LOG(poker__parse_hand_test());
+  LOG(poker__ordering_test());
   return 0;
 }
