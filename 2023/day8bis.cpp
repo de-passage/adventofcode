@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 bool end_with_z(const std::string& s) {
@@ -56,8 +57,16 @@ int main(int argc, const char **argv) {
   while (!dpsg::all(begins, end_with_z)) {
     logln("Current values: ", begins);
     steps++;
+    if (steps == 0) {
+      std::cerr << "too many steps, overflowed" << endl;
+      break;
+    }
+    if (steps % 100000000 == 0) {
+      std::cout << "step: " << steps << endl;
+    }
     char c = instructions[pos];
-    logln("instruction: ", c);
+    logln("instruction: ", c, "(" , pos , ")");
+
     for (auto& current : begins) {
       logln("current: ", current);
       auto rule = rules[current];

@@ -37,6 +37,17 @@ template <class T> std::ostream &log_(std::ostream &os, const T &r) {
   return os << r;
 }
 
+template <class F, std::enable_if_t<std::is_invocable_v<std::decay_t<F>>, int> = 0>
+std::ostream &log_(std::ostream &os, F&& f) {
+  return os << f();
+}
+
+template <class F, std::enable_if_t<std::is_invocable_v<std::decay_t<F>, std::ostream&>, int> = 0>
+std::ostream &log_(std::ostream &os, F&& f) {
+  f(os);
+  return os;
+}
+
 template <class T, class... Args>
 std::ostream &log_(std::ostream &os, const std::vector<T, Args...> &v) {
   os << "[";
