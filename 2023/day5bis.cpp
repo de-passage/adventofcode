@@ -45,53 +45,23 @@ int main(int argc, const char **argv) {
 
       range src_range = {src->value, src->value + dist->value};
       range dest_range = {dest->value, dest->value + dist->value};
-      logln("src: ", src_range, " dest: ", dest_range, " remaining seeds: ", seeds);
+      long long offset = (long long)dest_range.begin - (long long)src_range.begin;
+      logln("src: ", src_range, " dest: ", dest_range, " offset: ", offset, " remaining seeds: ", seeds);
 
       for (auto it = seeds.begin(); it != seeds.end();) {
         logln(*it, " & ", src_range);
-        // it is potentially in range (beg <= it.beg <= end)
-        if (src_range.begin <= it->begin && it->begin <= src_range.end) {
-          if (it->end <= src_range.end) {
-            // it is fully contained, we can insert the whole range mapped
-            auto offset = it->begin - src_range.begin;
-            auto new_range = range{dest_range.begin + offset, dest_range.begin + it->size() + offset};
-            logln("inserting the whole range, became: ", new_range);
-            range_merge_insert(new_seeds, new_range);
-          } else {
-            // We need to split the range in two, the first part is mapped, the other isn't.
-            range left = { it->begin, src_range.end };
-            range right = { src_range.end, it -> end };
-            auto offset = left.begin - src_range.begin;
-            auto new_range = range{dest_range.begin + offset, dest_range.begin + left.size() + offset};
-            logln("inserting the split range ", left, " (cast to ", new_range, ") and ", right);
-            range_merge_insert(new_seeds, new_range);
-            range_merge_insert(new_seeds, right);
-          }
-          unstable_erase(seeds, it);
-        } else if (src_range.begin > it->begin && src_range.end < it->end) {
-          // The src range is completely contained in it, we cast it to destination and insert the remainder
-          range left = range{it->begin, src_range.begin};
-          range right = range{it->end, src_range.end};
-          range_merge_insert(new_seeds, left);
-          range_merge_insert(new_seeds, dest_range);
-          range_merge_insert(new_seeds, right);
-          logln("inserting the split range (3 way) ", left, ", ", src_range, "(cast to ", dest_range, ") and ", right);
-
-          unstable_erase(seeds, it);
-
-        } else if (src_range.begin <= it->end && it->end <= src_range.end) {
-          // We need to map [src_range.begin..it->begin] and send the rest as is
-          range left = {it->begin, src_range.begin};
-          range right = {src_range.begin, it->end};
-          range new_range = range{dest_range.begin, dest_range.begin + right.size()};
-          logln("inserting the split range ", left, " and ", right, " (cast to ", new_range, ")");
-          range_merge_insert(new_seeds, left);
-          // No offset in this case, since the range to cast started at src_range
-          range_merge_insert(new_seeds, new_range) ;
-          unstable_erase(seeds, it);
+        auto extrusion = extrude(*it, src_range);
+        logln("extrusion: [left: ", extrusion.left, " | extrusion : ", extrusion.extruded, " | right: ", extrusion.right, " ]");
+        if (extrusion.extruded.size() > 0) {
+          range_merge_insert(new_seeds, extrusion.left);
+          range_merge_insert(new_seeds, extrusion.right);
+          logln("merging ", extrusion.extruded, " with offset ", offset, " -> ", extrusion.extruded + offset);
+          range_merge_insert(new_seeds, extrusion.extruded + offset);
+          it = seeds.erase(it);
         } else {
           ++it;
         }
+
       }
     }
     logln();
@@ -109,13 +79,9 @@ done:
 
   cout << "seeds: [";
   for (size_t i = 0; i < seeds.size(); ++i) {
-    if (i > 0)
-      cout << ", ";
-    else
-      cout << " ";
-    cout << seeds[i];
+    cout << "\t\n" << seeds[i];
   }
-  cout << " ]" << endl;
+  cout << "\n]" << endl;
 
   if (seeds.size() > 0) {
     cout << "min: " << seeds.front() << endl;

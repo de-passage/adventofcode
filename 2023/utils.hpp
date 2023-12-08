@@ -22,9 +22,12 @@ template <class T>
 std::ostream &operator<<(std::ostream &os, const ranged<T> &r);
 
 range find_range(std::string_view str, const char *pattern, size_t pos);
-std::optional<ranged<std::string_view>> next_word(std::string_view str,
-                                                  size_t pos = 0);
+
+std::optional<ranged<std::string_view>> next_word(std::string_view str, size_t pos = 0);
 std::optional<ranged<size_t>> next_number(std::string_view str, size_t pos = 0);
+std::optional<ranged<std::string_view>> next_alnum_sequence(std::string_view str, size_t pos = 0);
+std::optional<ranged<std::string_view>> next_symbol(std::string_view str, size_t pos = 0);
+
 bool isValid(range r);
 
 int get_log_level();
@@ -124,7 +127,9 @@ auto unstable_erase(C<T, R...> &vec, T value) {
 #ifdef COMPILE_UTILS
 
 const auto NUMBERS = "0123456789";
-const auto LETTERS = "abcdefghijklmnopqrstuvwxyz";
+const auto LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const auto SYMBOL_FIRST_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
+const auto SYMBOL_NEXT_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789";
 
 int LOG_LEVEL = 0;
 int get_log_level() { return LOG_LEVEL; }
@@ -182,6 +187,33 @@ std::optional<ranged<std::string_view>> next_word(std::string_view str,
   auto r = find_range(str, LETTERS, pos);
   if (isValid(r)) {
     return {{str.substr(r.begin, r.end - r.begin), r}};
+  }
+  return {};
+}
+
+std::optional<ranged<std::string_view>> next_symbol(std::string_view str, size_t pos) {
+  auto r = str.find_first_of(SYMBOL_FIRST_CHAR, pos);
+  if (r != std::string_view::npos) {
+    auto end = str.find_first_not_of(SYMBOL_NEXT_CHAR, r);
+    if (end == std::string_view::npos) {
+      end = str.size();
+    }
+    return {{str.substr(r, end - r), {r, end}}};
+  }
+  return {};
+}
+
+std::optional<ranged<std::string_view>> next_alnum_sequence(std::string_view str, size_t pos) {
+  auto r = std::find_if(str.begin() + pos, str.end(), [](char c) {
+    return std::isalnum(c);
+  });
+  if (r != str.end()) {
+    auto pos = std::distance(str.begin(), r);
+    auto end = std::find_if_not(str.begin() + pos, str.end(), [](char c) {
+      return std::isalnum(c);
+    });
+    auto d = std::distance(r, end);
+    return {{str.substr(pos, d), {size_t(pos), size_t(pos + d)}}};
   }
   return {};
 }

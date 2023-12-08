@@ -13,7 +13,7 @@ struct basic_range {
   T begin;
   T end;
 
-  inline constexpr std::make_signed_t<T> size() const { return end - begin; }
+  inline constexpr std::make_signed_t<T> size() const { return end <= begin ? 0 : end - begin; }
   inline constexpr bool contains(size_t pos) const {
     return pos >= begin && pos < end;
   }
@@ -31,7 +31,7 @@ void range_merge_insert(VectorLike<basic_range<T>> &v, basic_range<T> n) {
                              [](const range &left, const range &right) {
                                return left.begin < right.begin;
                              });
-  if (n.begin >= n.end)
+  if (n.size() == 0)
     return; // empty range
 
   if (it > v.begin() && (it - 1)->end > n.begin) {
@@ -48,7 +48,7 @@ void range_merge_insert(VectorLike<basic_range<T>> &v, basic_range<T> n) {
   auto next = it + 1;
   while (next != v.end()) {
     // std::cout << "trying to merge " << *it << " with " << *next << std::endl;
-    if (next->begin >= it->end) {
+    if (next->begin > it->end) {
       // std::cout << "no overlap" << std::endl;
       //  disjointed intervals, we may stop here
       break;
@@ -119,8 +119,16 @@ template <class T> struct std::hash<basic_range<T>> {
   }
 };
 
+template<class T, class U, std::enable_if_t<std::is_convertible_v<U, T>, int> = 0> inline constexpr basic_range<T> operator+(basic_range<T> lhs, U rhs) noexcept {
+  lhs.begin += rhs;
+  lhs.end += rhs;
+  return lhs;
+}
+
 template <class T>
 std::ostream &operator<<(std::ostream &os, const basic_range<T> &r) {
+  if (r.size() == 0)
+    return os << "[empty range]";
   return os << '[' << r.begin << ".." << r.end << ')';
 }
 #endif // HEADER_GUARD_RANGE_HPP

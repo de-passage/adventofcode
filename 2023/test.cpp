@@ -52,23 +52,23 @@ void range_merge_insert_test() {
 
   LOG(range_merge_insert(ranges_actual, range{7, 8}));
   TEST(ranges_actual, ==,
-       make_vec(range{1, 3}, range{4, 5}, range{7, 8}, range{8, 10}));
+       make_vec(range{1, 3}, range{4, 5}, range{7, 10}));
 
   LOG(range_merge_insert(ranges_actual, range{8, 15}));
   TEST(ranges_actual, ==,
-       make_vec(range{1, 3}, range{4, 5}, range{7, 8}, range{8, 15}));
+       make_vec(range{1, 3}, range{4, 5}, range{7, 15}));
 
   LOG(range_merge_insert(ranges_actual, range{2, 8}));
-  TEST(ranges_actual, ==, make_vec(range{1, 8}, range{8, 15}));
+  TEST(ranges_actual, ==, make_vec(range{1, 15}));
 
   LOG(range_merge_insert(ranges_actual, range{9, 10}));
-  TEST(ranges_actual, ==, make_vec(range{1, 8}, range{8, 15}));
+  TEST(ranges_actual, ==, make_vec(range{1, 15}));
 
   LOG(range_merge_insert(ranges_actual, range{0, 0}));
-  TEST(ranges_actual, ==, make_vec(range{1, 8}, range{8, 15}));
+  TEST(ranges_actual, ==, make_vec(range{1, 15}));
 
   LOG(range_merge_insert(ranges_actual, range{17, 16}));
-  TEST(ranges_actual, ==, make_vec(range{1, 8}, range{8, 15}));
+  TEST(ranges_actual, ==, make_vec(range{1, 15}));
 
   LOG(range_merge_insert(ranges_actual, range{0, 19}));
   TEST(ranges_actual, ==, make_vec(range{0, 19}));
@@ -273,26 +273,27 @@ void extrude_test() {
 
   LOG(auto result4 = extrude(range{0, 10}, range{5, 15}));
   TEST(result4.left, ==, (range{0, 5}));
-  TEST(result4.right, ==, (range{10, 15}));
+  TEST(result4.right.size(), ==, 0);
+  TEST(result4.extruded, ==, (range{5, 10}));
 
   LOG(auto result5 = extrude(range{0, 10}, range{15, 20}));
-  TEST(result5.left, ==, (range{0, 0}));
-  TEST(result5.right, ==, (range{10, 10}));
-  TEST(result5.extruded, ==, (range{0, 0}));
+  TEST(result5.left.size(), ==,  0);
+  TEST(result5.right.size(), ==, 0);
+  TEST(result5.extruded.size(), ==, 0);
 
   LOG(auto result6 = extrude(range{5, 10}, range{0, 15}));
-  TEST(result6.left, ==, (range{5, 5}));
-  TEST(result6.right, ==, (range{10, 10}));
+  TEST(result6.left.size(), ==, 0);
+  TEST(result6.right.size(), ==, 0);
   TEST(result6.extruded, ==, (range{5, 10}));
 }
 
 int main() {
   std::cout << std::boolalpha;
   LOG(range_merge_insert_test());
-  LOG(combine_ints_test());
-  LOG(poker__make_hand_test());
-  LOG(poker__parse_hand_test());
-  LOG(poker__ordering_test());
-  // LOG(extrude_test());
+  // LOG(combine_ints_test());
+  // LOG(poker__make_hand_test());
+  // LOG(poker__parse_hand_test());
+  // LOG(poker__ordering_test());
+  LOG(extrude_test());
   return 0;
 }
