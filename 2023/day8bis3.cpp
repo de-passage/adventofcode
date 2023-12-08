@@ -1,5 +1,7 @@
 #include "algorithms.hpp"
 #include "utils.hpp"
+#include "bit_array.hpp"
+
 #include <array>
 #include <string>
 #include <unordered_map>
@@ -34,83 +36,9 @@ inline std::string to_string(node n) {
   return s;
 }
 
-template <size_t S> struct bit_array {
-  uint8_t values[(S + 7) / 8];
-
-  inline constexpr uint8_t operator[](size_t i) const noexcept {
-    return (values[i / 8] >> (i % 8)) & 1;
-  }
-
-  struct proxy {
-    uint8_t *const dest;
-    const uint8_t offset;
-    const uint8_t mask = 1 << offset;
-    constexpr inline const proxy &operator=(uint8_t v) const noexcept {
-      // std::cout << std::hex << "ptr("<< (size_t)dest <<") dest: " <<
-      // int(*dest) << "\tmask: " << (int)mask << "\t~mask: " << (int)(~mask) <<
-      // "\t(dest&~mask): " << (int)(*dest&~mask) << "\tv: " << (int)v <<
-      // "\toffset: " << (int)offset << "\tv<<offset: " << int(v<<offset) << "
-      // -> ";
-      *dest = (*dest & ~mask) | (v << offset);
-      // std::cout << int(*dest) << std::endl;
-      return *this;
-    }
-    constexpr inline void set() const noexcept { *dest |= mask; }
-    constexpr inline void unset() const noexcept { *dest &= ~mask; }
-    constexpr inline void toggle() const noexcept { *dest ^= ~mask; }
-    constexpr operator uint8_t() const noexcept {
-      return (*dest & mask) >> offset;
-    }
-  };
-  inline constexpr proxy operator[](size_t i) noexcept {
-    return {
-        .dest = values + (i / 8),
-        .offset = uint8_t(i % 8),
-    };
-  }
-
-  constexpr inline size_t size() const noexcept { return S; }
-};
-
-template <
-    typename... Values,
-    std::enable_if_t<
-        std::conjunction_v<std::is_convertible<Values, uint8_t>...>, int> = 0>
-constexpr inline bit_array<sizeof...(Values) * 8>
-make_bit_array(Values... vs) noexcept {
-  return bit_array<sizeof...(Values) * 8>{
-      .values = {uint8_t(vs)...},
-  };
-}
-
-constexpr bit_array<0> a0{};
-static_assert(sizeof(a0) == 0);
-constexpr bit_array<1> a1{};
-static_assert(sizeof(a1) == 1);
-constexpr bit_array<8> a8{};
-static_assert(sizeof(a8) == 1);
-constexpr bit_array<9> a9{};
-static_assert(sizeof(a9) == 2);
-static_assert(sizeof(make_bit_array(0, 0)) == 2);
-static_assert(make_bit_array(0, 0xFF)[0] == 0);
-static_assert(make_bit_array(0, 0xFF)[1] == 0);
-static_assert(make_bit_array(0, 0xFF)[2] == 0);
-static_assert(make_bit_array(0, 0xFF)[3] == 0);
-static_assert(make_bit_array(0, 0xFF)[4] == 0);
-static_assert(make_bit_array(0, 0xFF)[5] == 0);
-static_assert(make_bit_array(0, 0xFF)[6] == 0);
-static_assert(make_bit_array(0, 0xFF)[7] == 0);
-static_assert(make_bit_array(0, 0xFF)[8] == 1);
-static_assert(make_bit_array(0, 0xFF)[9] == 1);
-static_assert(make_bit_array(0, 0xFF)[10] == 1);
-static_assert(make_bit_array(0, 0xFF)[11] == 1);
-static_assert(make_bit_array(0, 0xFF)[12] == 1);
-static_assert(make_bit_array(0, 0xFF)[13] == 1);
-static_assert(make_bit_array(0, 0xFF)[14] == 1);
-static_assert(make_bit_array(0, 0xFF)[15] == 1);
-
 int main(int argc, const char **argv) {
   using namespace std;
+  using namespace dpsg;
   auto file = get_input("day8.txt", argc, argv);
 
   string instruction_str;
@@ -119,12 +47,9 @@ int main(int argc, const char **argv) {
   bit_array<300> instructions;
   size_t instruction_size = instruction_str.size();
   for (size_t i = 0; i < instruction_size; ++i) {
-    // logln("assigning ", (instruction_str[i] == 'R'), " at ", i, " current
-    // value is ", (int)instructions[i]);
     instructions[i] = (instruction_str[i] == 'R');
   }
 
-  // logln(instruction_str, '(', instruction_size, ')');
   logln([&](ostream&out) {
     for (size_t i = 0; i < instruction_size; ++i) {
       out << ((instructions[i] == 1) ? 'R' : 'L');
@@ -190,7 +115,6 @@ int main(int argc, const char **argv) {
     size_t loop_node_position;
     std::vector<end_point> end_points;
   };
-  std::vector<data> steps_per_starter;
 
   const auto log_node = [](auto n) { return [n]() { return to_string(n); }; };
 
@@ -207,8 +131,9 @@ int main(int argc, const char **argv) {
       return [n](ostream& os) { n == size_t(-1) ? os << "not visited" : os << n; };
   };
 
+  std::vector<data> data_store;
   for (auto start : nodes) {
-    auto &data = steps_per_starter.emplace_back();
+    auto &data = data_store.emplace_back();
     data.start_node = start;
     memset(&vs, -1, sizeof(vs));
     memset(&met_at, -1, sizeof(met_at));
@@ -249,12 +174,20 @@ int main(int argc, const char **argv) {
     }
   }
 
-  for (auto &p : steps_per_starter) {
+  for (auto &p : data_store) {
     std::cout << "start: " << to_string(p.start_node) << " , loop: " << to_string(p.loop_node) << " , steps: " << p.total_steps << " , loop length: " << p.loop_length << " , loop start: " << p.loop_node_position <<  " , ends: ";
     for (auto &p : p.end_points) {
       std::cout << "{" << to_string(p.n) << "," << p.s << "}, ";
     }
     std::cout << std::endl;
   }
-  cout << endl;
+
+  auto l = data_store[0].loop_length;
+  auto g = data_store[0].loop_length;
+  for (size_t i = 1; i < data_store.size(); ++i) {
+    auto &p = data_store[i];
+    l = std::lcm(l, p.loop_length);
+    g = std::gcd(g, p.loop_length);
+  }
+  cout << "lcm: " << l << "gcm: " << g << endl;
 }
