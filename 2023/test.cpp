@@ -72,6 +72,27 @@ void range_merge_insert_test() {
 
   LOG(range_merge_insert(ranges_actual, range{0, 19}));
   TEST(ranges_actual, ==, make_vec(range{0, 19}));
+
+  LOG(range_merge_insert(ranges_actual, range{30, 40}));
+  TEST(ranges_actual, ==, make_vec(range{0, 19}, range{30, 40}));
+
+  LOG(range_merge_insert(ranges_actual, range{50, 60}));
+  TEST(ranges_actual, ==, make_vec(range{0, 19}, range{30, 40}, range{50, 60}));
+
+  LOG(range_merge_insert(ranges_actual, range{70, 80}));
+  TEST(ranges_actual, ==, make_vec(range{0, 19}, range{30, 40}, range{50, 60}, range{70, 80}));
+
+  LOG(range_merge_insert(ranges_actual, range{20, 25}));
+  TEST(ranges_actual, ==, make_vec(range{0, 19}, range{20, 25}, range{30, 40}, range{50, 60}, range{70, 80}));
+
+  LOG(range_merge_insert(ranges_actual, range{100, 101}));
+  TEST(ranges_actual, ==, make_vec(range{0, 19}, range{20, 25}, range{30, 40}, range{50, 60}, range{70, 80}, range{100, 101}));
+
+  LOG(range_merge_insert(ranges_actual, range{69, 70}));
+  TEST(ranges_actual, ==, make_vec(range{0, 19}, range{20, 25}, range{30, 40}, range{50, 60}, range{69, 80}, range{100, 101}));
+
+  LOG(range_merge_insert(ranges_actual, range{24, 69}));
+  TEST(ranges_actual, ==, make_vec(range{0, 19}, range{20, 80}, range{100, 101}));
 }
 
 void combine_ints_test() {
@@ -290,10 +311,10 @@ void extrude_test() {
 int main() {
   std::cout << std::boolalpha;
   LOG(range_merge_insert_test());
-  // LOG(combine_ints_test());
-  // LOG(poker__make_hand_test());
-  // LOG(poker__parse_hand_test());
-  // LOG(poker__ordering_test());
+  LOG(combine_ints_test());
+  LOG(poker__make_hand_test());
+  LOG(poker__parse_hand_test());
+  LOG(poker__ordering_test());
   LOG(extrude_test());
   return 0;
 }

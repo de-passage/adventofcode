@@ -9,6 +9,7 @@
 #include "utils.hpp"
 
 using namespace std;
+using namespace dpsg;
 
 struct cube {
   int r;

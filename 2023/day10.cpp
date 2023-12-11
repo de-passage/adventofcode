@@ -110,6 +110,7 @@ void print_maze(vector<string> maze, coord s) {
 }
 
 int main(int argc, const char** argv) {
+  using namespace dpsg;
   auto file = get_input("day10.txt", argc, argv);
 
   vector<string> maze;

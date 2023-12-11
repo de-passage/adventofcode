@@ -1,18 +1,19 @@
 #ifndef HEADER_GUARD_UTILS_HPP
 #define HEADER_GUARD_UTILS_HPP
 
+#include "range.hpp"
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
-#include <iostream>
 #include <iterator>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <type_traits>
 #include <vector>
-#include "range.hpp"
+
+namespace dpsg {
 
 template <class T> struct ranged {
   T value;
@@ -23,10 +24,13 @@ std::ostream &operator<<(std::ostream &os, const ranged<T> &r);
 
 range find_range(std::string_view str, const char *pattern, size_t pos);
 
-std::optional<ranged<std::string_view>> next_word(std::string_view str, size_t pos = 0);
+std::optional<ranged<std::string_view>> next_word(std::string_view str,
+                                                  size_t pos = 0);
 std::optional<ranged<size_t>> next_number(std::string_view str, size_t pos = 0);
-std::optional<ranged<std::string_view>> next_alnum_sequence(std::string_view str, size_t pos = 0);
-std::optional<ranged<std::string_view>> next_symbol(std::string_view str, size_t pos = 0);
+std::optional<ranged<std::string_view>>
+next_alnum_sequence(std::string_view str, size_t pos = 0);
+std::optional<ranged<std::string_view>> next_symbol(std::string_view str,
+                                                    size_t pos = 0);
 
 bool isValid(range r);
 
@@ -37,13 +41,16 @@ template <class T> std::ostream &log_(std::ostream &os, const T &r) {
   return os << r;
 }
 
-template <class F, std::enable_if_t<std::is_invocable_v<std::decay_t<F>>, int> = 0>
-std::ostream &log_(std::ostream &os, F&& f) {
+template <class F,
+          std::enable_if_t<std::is_invocable_v<std::decay_t<F>>, int> = 0>
+std::ostream &log_(std::ostream &os, F &&f) {
   return os << f();
 }
 
-template <class F, std::enable_if_t<std::is_invocable_v<std::decay_t<F>, std::ostream&>, int> = 0>
-std::ostream &log_(std::ostream &os, F&& f) {
+template <class F,
+          std::enable_if_t<std::is_invocable_v<std::decay_t<F>, std::ostream &>,
+                           int> = 0>
+std::ostream &log_(std::ostream &os, F &&f) {
   f(os);
   return os;
 }
@@ -77,8 +84,9 @@ template <class... Args> void logln(Args &&...args) {
 std::fstream get_input(std::string filename, int argc, const char **arg);
 
 template <template <class T, class... R> class C, class T, class U,
-          std::enable_if_t<std::is_convertible_v<std::decay_t<U>, T>, int> = 0, class... R>
-void sorted_insert(C<T, R...> &vec, U&& value) {
+          std::enable_if_t<std::is_convertible_v<std::decay_t<U>, T>, int> = 0,
+          class... R>
+void sorted_insert(C<T, R...> &vec, U &&value) {
   using std::begin;
   using std::end;
   auto it = std::lower_bound(begin(vec), end(vec), value);
@@ -88,22 +96,20 @@ void sorted_insert(C<T, R...> &vec, U&& value) {
 // replacement for std::erase that does not preserves the relative order of
 // the remaining elements. It does this by swapping the element to be erased
 // with the last element.
-// The iterator value is changed in the process, as the value at the current iterator
-// is swapped with the last element.
-// This means you should only process the vector sequentially from the beginning
-// to the end, without incrementing the iterator when calling erase, or you'll skip
-// past the element that was swapped in!!!
+// The iterator value is changed in the process, as the value at the current
+// iterator is swapped with the last element. This means you should only process
+// the vector sequentially from the beginning to the end, without incrementing
+// the iterator when calling erase, or you'll skip past the element that was
+// swapped in!!!
 //
 // Example:
 // >	std::vector<int> vec = {1, 2, 3, 4, 5, 6};
 // >	auto it = vec.begin();
 // >	while (it != vec.end()) {
 // >	  if (*it % 2 == 0) {
-// >	    unstable_erase(vec, it); // 2 is swapped with 6, then popped, so we need to reprocess 6 by not incrementing
-// >	  } else {
-// >	    it++;
-// >	  }
-// >	}
+// >	    unstable_erase(vec, it); // 2 is swapped with 6, then popped, so we
+// need to reprocess 6 by not incrementing >	  } else { >	    it++; >
+// } >	}
 //
 template <template <class T, class... R> class C, class T, class It, class... R>
 auto unstable_erase(C<T, R...> &vec, It it)
@@ -134,13 +140,17 @@ auto unstable_erase(C<T, R...> &vec, T value) {
     vec.pop_back();
   }
 }
+} // namespace dpsg
 
 #ifdef COMPILE_UTILS
+namespace dpsg {
 
 const auto NUMBERS = "0123456789";
 const auto LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const auto SYMBOL_FIRST_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
-const auto SYMBOL_NEXT_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789";
+const auto SYMBOL_FIRST_CHAR =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
+const auto SYMBOL_NEXT_CHAR =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789";
 
 int LOG_LEVEL = 0;
 int get_log_level() { return LOG_LEVEL; }
@@ -202,7 +212,8 @@ std::optional<ranged<std::string_view>> next_word(std::string_view str,
   return {};
 }
 
-std::optional<ranged<std::string_view>> next_symbol(std::string_view str, size_t pos) {
+std::optional<ranged<std::string_view>> next_symbol(std::string_view str,
+                                                    size_t pos) {
   auto r = str.find_first_of(SYMBOL_FIRST_CHAR, pos);
   if (r != std::string_view::npos) {
     auto end = str.find_first_not_of(SYMBOL_NEXT_CHAR, r);
@@ -214,15 +225,14 @@ std::optional<ranged<std::string_view>> next_symbol(std::string_view str, size_t
   return {};
 }
 
-std::optional<ranged<std::string_view>> next_alnum_sequence(std::string_view str, size_t pos) {
-  auto r = std::find_if(str.begin() + pos, str.end(), [](char c) {
-    return std::isalnum(c);
-  });
+std::optional<ranged<std::string_view>>
+next_alnum_sequence(std::string_view str, size_t pos) {
+  auto r = std::find_if(str.begin() + pos, str.end(),
+                        [](char c) { return std::isalnum(c); });
   if (r != str.end()) {
     auto pos = std::distance(str.begin(), r);
-    auto end = std::find_if_not(str.begin() + pos, str.end(), [](char c) {
-      return std::isalnum(c);
-    });
+    auto end = std::find_if_not(str.begin() + pos, str.end(),
+                                [](char c) { return std::isalnum(c); });
     auto d = std::distance(r, end);
     return {{str.substr(pos, d), {size_t(pos), size_t(pos + d)}}};
   }
@@ -238,10 +248,11 @@ std::ostream &operator<<(std::ostream &os, const ranged<T> &r) {
 inline size_t combine_ints(size_t left, size_t right) {
   size_t t = right;
   while (t > 0) {
-    left*=10;
+    left *= 10;
     t /= 10;
   }
   return left + right;
+}
 }
 
 #endif // HEADER_GUARD_UTILS_HPP

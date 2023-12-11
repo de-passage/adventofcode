@@ -4,6 +4,7 @@
 
 int main(int argc, const char** argv) {
   using namespace std;
+  using namespace dpsg;
   auto file = get_input("day6.txt", argc, argv);
 
   vector<int> times;

@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 int main(int argc, const char **argv) {
+  using namespace dpsg;
   using namespace std;
   auto file = get_input("day8.txt", argc, argv);
 

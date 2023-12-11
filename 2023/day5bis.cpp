@@ -3,6 +3,7 @@
 
 int main(int argc, const char **argv) {
   using namespace std;
+  using namespace dpsg;
 
   auto file = get_input("day5.txt", argc, argv);
 

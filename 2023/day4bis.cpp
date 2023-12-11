@@ -6,6 +6,7 @@
 using namespace std;
 
 int main(int argc, const char ** argv) {
+  using namespace dpsg;
   auto file = get_input("day4.txt", argc, argv);
 
   std::string line;

@@ -6,14 +6,18 @@
 #include <optional>
 #include <type_traits>
 #include <vector>
-// #include <iostream>
+#include <iostream>
+
+namespace dpsg {
 
 template <class T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
 struct basic_range {
   T begin;
   T end;
 
-  inline constexpr std::make_signed_t<T> size() const { return end <= begin ? 0 : end - begin; }
+  inline constexpr std::make_signed_t<T> size() const {
+    return end <= begin ? 0 : end - begin;
+  }
   inline constexpr bool contains(size_t pos) const {
     return pos >= begin && pos < end;
   }
@@ -36,18 +40,15 @@ void range_merge_insert(VectorLike<basic_range<T>> &v, basic_range<T> n) {
 
   if (it > v.begin() && (it - 1)->end > n.begin) {
     auto prev = it - 1;
-    // std::cout << "merging (overlap) " << *prev << " with " << n << std::endl;
     prev->end = std::max(prev->end, n.end);
     it = prev;
     it->end = std::max(it->end, n.end);
   } else {
-    // std::cout << "no overlap, inserting " << n << std::endl;
     it = v.insert(it, n);
   }
 
   auto next = it + 1;
   while (next != v.end()) {
-    // std::cout << "trying to merge " << *it << " with " << *next << std::endl;
     if (next->begin > it->end) {
       // std::cout << "no overlap" << std::endl;
       //  disjointed intervals, we may stop here
@@ -56,7 +57,6 @@ void range_merge_insert(VectorLike<basic_range<T>> &v, basic_range<T> n) {
 
     // next->begin overlaps the new range
     it->end = std::max(it->end, next->end);
-    // std::cout << "merged " << *it << endl;
 
     v.erase(next);
     next = it + 1;
@@ -80,7 +80,8 @@ inline constexpr extrude_result<T> extrude(basic_range<T> from,
     result.right = {extrusion.end, from.end};
   }
   if (extrusion.begin <= from.begin || extrusion.end >= from.end) {
-    result.extruded = {std::max(from.begin, extrusion.begin), std::min(from.end, extrusion.end)};
+    result.extruded = {std::max(from.begin, extrusion.begin),
+                       std::min(from.end, extrusion.end)};
   }
   return result;
 }
@@ -112,14 +113,18 @@ inline constexpr bool operator==(const basic_range<T> &lhs,
                                  const basic_range<T> &rhs) noexcept {
   return lhs.begin == rhs.begin && lhs.end == rhs.end;
 }
+} // namespace dpsg
 
-template <class T> struct std::hash<basic_range<T>> {
-  size_t operator()(const basic_range<T> &r) const {
+template <class T> struct ::std::hash<dpsg::basic_range<T>> {
+  size_t operator()(const dpsg::basic_range<T> &r) const {
     return std::hash<T>()(r.begin) ^ (std::hash<T>()(r.end) << 1);
   }
 };
 
-template<class T, class U, std::enable_if_t<std::is_convertible_v<U, T>, int> = 0> inline constexpr basic_range<T> operator+(basic_range<T> lhs, U rhs) noexcept {
+namespace dpsg {
+template <class T, class U,
+          std::enable_if_t<std::is_convertible_v<U, T>, int> = 0>
+inline constexpr basic_range<T> operator+(basic_range<T> lhs, U rhs) noexcept {
   lhs.begin += rhs;
   lhs.end += rhs;
   return lhs;
@@ -131,4 +136,5 @@ std::ostream &operator<<(std::ostream &os, const basic_range<T> &r) {
     return os << "[empty range]";
   return os << '[' << r.begin << ".." << r.end << ')';
 }
+} // namespace dpsg
 #endif // HEADER_GUARD_RANGE_HPP
