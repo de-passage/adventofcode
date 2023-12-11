@@ -1,57 +1,11 @@
+#include "coord.hpp"
 #include "utils.hpp"
 
 using namespace std;
-
-struct coord {
-  int x;
-  int y;
-};
-
-std::ostream& operator<<(std::ostream& os, coord c) {
-  os << "(" << c.x << ", " << c.y << ")";
-  return os;
-}
-
-coord operator+(coord a, coord b) {
-  return {a.x + b.x, a.y + b.y};
-}
-
-coord operator+=(coord& a, coord b) {
-  a.x += b.x;
-  a.y += b.y;
-  return a;
-}
-
-bool operator==(coord a, coord b) {
-  return a.x == b.x && a.y == b.y;
-}
-
-bool operator!=(coord a, coord b) {
-  return !(a == b);
-}
-
-bool operator<(coord a, coord b) {
-  return a.x < b.x || (a.x == b.x && a.y < b.y);
-}
-
-bool operator>(coord a, coord b) {
-  return a.x > b.x || (a.x == b.x && a.y > b.y);
-}
-
-bool operator<=(coord a, coord b) {
-  return a < b || a == b;
-}
-
-bool operator>=(coord a, coord b) {
-  return a > b || a == b;
-}
+using namespace dpsg;
 
 bool valid(coord c, vector<string> maze) {
   return c.x >= 0 && c.x < maze.size() && c.y >= 0 && c.y < maze[c.x].size();
-}
-
-coord operator-(coord c) {
-  return {-c.x, -c.y};
 }
 
 auto at(coord c, vector<string> maze) {

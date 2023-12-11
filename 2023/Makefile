@@ -20,7 +20,9 @@ LIBRARIES =
 LIBS =
 
 # Specify the compile flags
-CFLAGS = $(shell cat compile_flags.txt)
+CFLAGS =
+
+ACTUAL_CFLAGS = $(CFLAGS) $(shell cat compile_flags.txt)
 
 # Specify the linker flags
 LDFLAGS =
@@ -31,11 +33,11 @@ run_test: test
 	@echo "Test passed successfully!"
 
 test: test.cpp
-	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS) -g
+	$(CC) $(ACTUAL_CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS) -g
 
 # Target for the executable
 %: %.cpp
-		$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS)
+		$(CC) $(ACTUAL_CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS)
 
 # Target for cleaning up
 clean:
