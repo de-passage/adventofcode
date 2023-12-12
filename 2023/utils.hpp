@@ -71,14 +71,14 @@ std::ostream &log_(std::ostream &os, const std::vector<T, Args...> &v) {
 template <class... Args> void log(Args &&...args) {
   if (get_log_level() < 1)
     return;
-  (log_(std::cout, args), ...);
+  (log_(std::clog, args), ...);
 }
 
 template <class... Args> void logln(Args &&...args) {
   if (get_log_level() < 1)
     return;
-  (log_(std::cout, args), ...);
-  std::cout << std::endl;
+  (log_(std::clog, args), ...);
+  std::clog << std::endl;
 }
 
 std::fstream get_input(std::string filename, int argc, const char **arg);

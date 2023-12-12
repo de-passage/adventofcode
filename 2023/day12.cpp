@@ -10,7 +10,8 @@ int main(int argc, const char **argv) {
   string line;
   size_t s = 0;
   while (getline(file, line)) {
-    s += process_input_line(line);
+    auto [states, groups] = process_input_line(line);
+    s += count_possibilities(states, groups);
   }
   std::cout << s << std::endl;
 }
