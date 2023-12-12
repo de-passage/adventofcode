@@ -33,7 +33,7 @@ run_test: test
 	@echo "Test passed successfully!"
 
 test: test.cpp
-	$(CC) $(REAL_CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS) -g
+	$(CC) $(ACTUAL_CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS) -g
 
 # Target for the executable
 %: %.cpp

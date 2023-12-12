@@ -1,25 +1,29 @@
+#include "day12.hpp"
 #include "poker.hpp"
 #include "utils.hpp"
 
 #define TEST(what, op, ref)                                                    \
-  if (what op ref) {                                                           \
-    log_(cout, "Test passed: ");                                               \
-    cout << " ";                                                               \
-    log_(cout, what);                                                          \
-    cout << " ";                                                               \
-    log_(cout, #op);                                                           \
-    cout << " ";                                                               \
-    log_(cout, ref);                                                           \
-    cout << std::endl;                                                         \
-  } else {                                                                     \
-    cout << "Test failed (" << #what << ' ' << #op << ' ' << #ref << "):  ";   \
-    log_(cout, what);                                                          \
-    cout << " ";                                                               \
-    log_(cout, #op);                                                           \
-    cout << " ";                                                               \
-    log_(cout, ref);                                                           \
-    cout << std::endl;                                                         \
-    exit(1);                                                                   \
+  {                                                                            \
+    auto what_ = (what);                                                       \
+    if (what_ op ref) {                                                        \
+      log_(cout, "Test passed: ");                                             \
+      cout << " ";                                                             \
+      log_(cout, what_);                                                       \
+      cout << " ";                                                             \
+      log_(cout, #op);                                                         \
+      cout << " ";                                                             \
+      log_(cout, ref);                                                         \
+      cout << std::endl;                                                       \
+    } else {                                                                   \
+      cout << "Test failed (" << #what << ' ' << #op << ' ' << #ref << "):  "; \
+      log_(cout, what_);                                                       \
+      cout << " ";                                                             \
+      log_(cout, #op);                                                         \
+      cout << " ";                                                             \
+      log_(cout, ref);                                                         \
+      cout << std::endl;                                                       \
+      exit(1);                                                                 \
+    }                                                                          \
   }
 
 #define LOG(what)                                                              \
@@ -27,6 +31,7 @@
   what;
 
 using namespace std;
+using namespace dpsg;
 
 template <typename T, typename... Ts> vector<T> make_vec(T arg, Ts... args) {
   vector<T> vec;
@@ -51,12 +56,10 @@ void range_merge_insert_test() {
   TEST(ranges_actual, ==, make_vec(range{1, 3}, range{4, 5}, range{8, 10}));
 
   LOG(range_merge_insert(ranges_actual, range{7, 8}));
-  TEST(ranges_actual, ==,
-       make_vec(range{1, 3}, range{4, 5}, range{7, 10}));
+  TEST(ranges_actual, ==, make_vec(range{1, 3}, range{4, 5}, range{7, 10}));
 
   LOG(range_merge_insert(ranges_actual, range{8, 15}));
-  TEST(ranges_actual, ==,
-       make_vec(range{1, 3}, range{4, 5}, range{7, 15}));
+  TEST(ranges_actual, ==, make_vec(range{1, 3}, range{4, 5}, range{7, 15}));
 
   LOG(range_merge_insert(ranges_actual, range{2, 8}));
   TEST(ranges_actual, ==, make_vec(range{1, 15}));
@@ -80,19 +83,27 @@ void range_merge_insert_test() {
   TEST(ranges_actual, ==, make_vec(range{0, 19}, range{30, 40}, range{50, 60}));
 
   LOG(range_merge_insert(ranges_actual, range{70, 80}));
-  TEST(ranges_actual, ==, make_vec(range{0, 19}, range{30, 40}, range{50, 60}, range{70, 80}));
+  TEST(ranges_actual, ==,
+       make_vec(range{0, 19}, range{30, 40}, range{50, 60}, range{70, 80}));
 
   LOG(range_merge_insert(ranges_actual, range{20, 25}));
-  TEST(ranges_actual, ==, make_vec(range{0, 19}, range{20, 25}, range{30, 40}, range{50, 60}, range{70, 80}));
+  TEST(ranges_actual, ==,
+       make_vec(range{0, 19}, range{20, 25}, range{30, 40}, range{50, 60},
+                range{70, 80}));
 
   LOG(range_merge_insert(ranges_actual, range{100, 101}));
-  TEST(ranges_actual, ==, make_vec(range{0, 19}, range{20, 25}, range{30, 40}, range{50, 60}, range{70, 80}, range{100, 101}));
+  TEST(ranges_actual, ==,
+       make_vec(range{0, 19}, range{20, 25}, range{30, 40}, range{50, 60},
+                range{70, 80}, range{100, 101}));
 
   LOG(range_merge_insert(ranges_actual, range{69, 70}));
-  TEST(ranges_actual, ==, make_vec(range{0, 19}, range{20, 25}, range{30, 40}, range{50, 60}, range{69, 80}, range{100, 101}));
+  TEST(ranges_actual, ==,
+       make_vec(range{0, 19}, range{20, 25}, range{30, 40}, range{50, 60},
+                range{69, 80}, range{100, 101}));
 
   LOG(range_merge_insert(ranges_actual, range{24, 69}));
-  TEST(ranges_actual, ==, make_vec(range{0, 19}, range{20, 80}, range{100, 101}));
+  TEST(ranges_actual, ==,
+       make_vec(range{0, 19}, range{20, 80}, range{100, 101}));
 }
 
 void combine_ints_test() {
@@ -298,7 +309,7 @@ void extrude_test() {
   TEST(result4.extruded, ==, (range{5, 10}));
 
   LOG(auto result5 = extrude(range{0, 10}, range{15, 20}));
-  TEST(result5.left.size(), ==,  0);
+  TEST(result5.left.size(), ==, 0);
   TEST(result5.right.size(), ==, 0);
   TEST(result5.extruded.size(), ==, 0);
 
@@ -308,13 +319,27 @@ void extrude_test() {
   TEST(result6.extruded, ==, (range{5, 10}));
 }
 
+void day12_test() {
+  TEST(process_input_line(" 0"), ==, 1);
+  TEST(process_input_line("? 1"), ==, 1);
+  TEST(process_input_line("? "), ==, 1);
+  TEST(process_input_line("#.#.### 1,1,3"), ==, 1);
+  TEST(process_input_line("???.### 1,1,3"), ==, 1);
+  TEST(process_input_line(".??..??...?##. 1,1,3"), ==, 4);
+  TEST(process_input_line("?#?#?#?#?#?#?#? 1,3,1,6"), ==, 1);
+  TEST(process_input_line("????.#...#... 4,1,1"), ==, 1);
+  TEST(process_input_line("????.######..#####. 1,6,5"), ==, 4);
+  TEST(process_input_line("?###???????? 3,2,1"), ==, 10);
+}
+
 int main() {
   std::cout << std::boolalpha;
-  LOG(range_merge_insert_test());
-  LOG(combine_ints_test());
-  LOG(poker__make_hand_test());
-  LOG(poker__parse_hand_test());
-  LOG(poker__ordering_test());
-  LOG(extrude_test());
+  // LOG(range_merge_insert_test());
+  // LOG(combine_ints_test());
+  // LOG(poker__make_hand_test());
+  // LOG(poker__parse_hand_test());
+  // LOG(poker__ordering_test());
+  // LOG(extrude_test());
+  LOG(day12_test());
   return 0;
 }
