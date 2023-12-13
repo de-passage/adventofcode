@@ -21,10 +21,17 @@ int main(int argc, const char **argv) {
   size_t acc = 0;
   parse_grid(get_line(file),
              with_number_vectors<size_t>([&](const auto &lines, const auto& cols) {
-               auto syml = potential_smudges(lines);
-               auto symc = potential_smudges(cols);
-               logln("potential smudges (lines): ", syml);
-               logln("potential smudges (cols): ", symc);
+               auto syml = lowest_symetric_index(lines);
+               logln("symetry  (lines): ", syml);
+               auto symc = lowest_symetric_index(cols);
+               logln("symetry   (cols): ", symc);
+
+               auto sml = lowest_index_with_smudge(lines, syml);
+               logln("potential smudges (lines): ", sml);
+               auto smc = lowest_index_with_smudge(cols, symc);
+               logln("potential smudges (cols): ", smc);
+
+               acc += sml * 100 + smc;
              }));
   std::cout << "Total: " << acc << std::endl;
 }
