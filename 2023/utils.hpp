@@ -15,6 +15,22 @@
 
 namespace dpsg {
 
+template<class T, class U>
+concept same_as = std::is_same_v<T, U> && std::is_same_v<U, T>;
+
+template <class It>
+  concept input_iterator = requires(It it) {
+  { *it } -> same_as<typename std::iterator_traits<It>::reference>;
+  { ++it } -> same_as<It &>;
+  { it++ } -> same_as<It>;
+};
+
+template <class T>
+concept Iterable = requires(T t) {
+  { std::begin(t) } -> input_iterator;
+  { std::end(t) } -> input_iterator;
+};
+
 template <class T> struct ranged {
   T value;
   range position;
@@ -36,6 +52,8 @@ bool isValid(range r);
 
 int get_log_level();
 void set_log_level(int level);
+template<class T, class U>
+std::ostream& log_(std::ostream& os, const std::pair<T,U>&  opt);
 
 template <class T> std::ostream &log_(std::ostream &os, const T &r) {
   return os << r;
@@ -63,10 +81,26 @@ std::ostream &log_(std::ostream &os, const std::vector<T, Args...> &v) {
       os << ", ";
     else
       os << " ";
-    os << v[i];
+    log_(os, v[i]);
   }
   return os << " ]";
 }
+
+std::ostream& log_(std::ostream& os, const Iterable auto&  opt) {
+  os << "{";
+  for (auto&& e : opt) {
+    log_(os, e);
+    os << ", ";
+  }
+  return os << "}";
+}
+
+template<class T, class U>
+std::ostream& log_(std::ostream& os, const std::pair<T,U>&  opt) {
+  os << "<"; log_(os, opt.first); os << ", "; log_(os, opt.second);
+  return os << ">";
+}
+
 
 template <class... Args> void log(Args &&...args) {
   if (get_log_level() < 1)

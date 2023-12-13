@@ -1,5 +1,6 @@
 #include "day12.hpp"
 #include "poker.hpp"
+#include "symetry.hpp"
 #include "utils.hpp"
 
 #define TEST(what, op, ref)                                                    \
@@ -402,6 +403,17 @@ void day12_test() {
   TEST(compute_day12bis("#??..???????#? 2,1,5"), ==, 22143);
 }
 
+void symetry_test() {
+  TEST(lowest_symetric_index(make_vec(1, 2, 3, 4, 5)), ==, 0);
+  TEST(lowest_symetric_index(make_vec(1, 2, 3, 4, 4)), ==, 4);
+  TEST(lowest_symetric_index(make_vec(1, 2, 3, 3, 4)), ==, 0);
+  TEST(lowest_symetric_index(make_vec(1, 4, 3, 3, 4)), ==, 3);
+  TEST(lowest_symetric_index(make_vec(1, 2, 2, 3, 4)), ==, 0);
+  TEST(lowest_symetric_index(make_vec(1, 2, 2, 1, 4)), ==, 2);
+  TEST(lowest_symetric_index(make_vec(1, 1, 2, 3, 4)), ==, 1);
+  TEST(lowest_symetric_index(make_vec(4, 3, 2, 1, 1, 2, 3, 4)), ==, 4);
+}
+
 int main() {
   std::cout << std::boolalpha;
   // LOG(range_merge_insert_test());
@@ -410,6 +422,7 @@ int main() {
   // LOG(poker__parse_hand_test());
   // LOG(poker__ordering_test());
   // LOG(extrude_test());
-  LOG(day12_test());
+  // LOG(day12_test());
+  LOG(symetry_test());
   return 0;
 }
