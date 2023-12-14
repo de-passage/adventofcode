@@ -178,25 +178,10 @@ void doit(const std::vector<string>& maze, coord s) {
   for (auto i = 1u; i < vertices.size(); i++) {
     auto& v1 = vertices[i - 1];
     auto& v2 = vertices[i];
-    sum += abs(v1.x*v2.y - v1.y*v2.x);
+    sum += v1.x*v2.y - v1.y*v2.x;
   }
-  sum += abs(vertices[vertices.size() - 1].x*vertices[0].y - vertices[vertices.size() - 1].y*vertices[0].x);
+  sum += vertices[vertices.size() - 1].x*vertices[0].y - vertices[vertices.size() - 1].y*vertices[0].x;
 
-  auto sum_f = 0;
-  for (auto i = 1u; i < vertices.size(); i++) {
-    auto& v1 = vertices[i - 1];
-    auto& v2 = vertices[i];
-    sum_f += v1.x*v2.y - v1.y*v2.x;
-  }
-  sum_f += vertices[vertices.size() - 1].x*vertices[0].y - vertices[vertices.size() - 1].y*vertices[0].x;
-
-  auto sum_b = 0;
-  for (auto i = vertices.size() - 1; i > 0; --i) {
-    auto& v1 = vertices[i];
-    auto& v2 = vertices[i - 1];
-    sum_b += v1.x*v2.y - v1.y*v2.x;
-  }
-  sum_b += vertices[0].x*vertices[vertices.size() - 1].y - vertices[0].y*vertices[vertices.size() - 1].x;
 
   for (auto i = 0u; i < maze.size(); i++) {
     for (auto j = 0u; j < maze[i].size(); j++) {
@@ -208,18 +193,10 @@ void doit(const std::vector<string>& maze, coord s) {
     }
     std::cout << std::endl;
   }
-  double area = double(sum) / 2.;
-  double area_f = double(sum_f) / 2.;
-  double area_b = double(sum_b) / 2.;
-  std::cout << "Found " << vertices.size() << " vertices" << std::endl; logln(vertices);
-  std::cout << "Area (abs): " << area << " Sq root: " << std::sqrt(area) << std::endl;
-  std::cout << "Area (forward): " << area_f << " Sq root: " << std::sqrt(area_f) << std::endl;
-  std::cout << "Area (backward): " << area_b << " Sq root: " << std::sqrt(area_b) << std::endl;
-  std::cout << "Steps: " << steps << std::endl;
-  std::cout << "Area minus steps: " << (abs(area_f) - steps) << std::endl;
-  auto grid = (abs(area_f) - (double(steps)/2.));
-  std::cout << "Attempt: " << grid << " Sq root: " << sqrt(grid) << std::endl;
-  std::cout << "Grid size: " << maze.size() << "x" << maze[0].size() << " == " << maze.size() * maze[0].size()<< std::endl;
+  double area = abs(double(sum) / 2.);
+  std::cout << "Found " << vertices.size() << " vertices over " << steps << " steps" << std::endl; logln(vertices);
+  auto pick = abs(area) + 1 - double(steps) / 2.;
+  std::cout << "Area: " << area << "  Pick: " << pick << std::endl;
 }
 
 int main(int argc, const char **argv) {
