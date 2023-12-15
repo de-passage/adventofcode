@@ -86,6 +86,11 @@ std::ostream &log_(std::ostream &os, const std::vector<T, Args...> &v) {
   return os << " ]";
 }
 
+template<class T, class Traits>
+std::ostream& log_(std::ostream& os, const std::basic_string_view<T, Traits>&  opt) {
+  return os << opt;
+}
+
 std::ostream& log_(std::ostream& os, const Iterable auto&  opt) {
   os << "{";
   for (auto&& e : opt) {
