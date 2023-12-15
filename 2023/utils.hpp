@@ -50,8 +50,10 @@ std::optional<ranged<std::string_view>> next_symbol(std::string_view str,
 
 bool isValid(range r);
 
-int get_log_level();
+enum class log_level { none, fatal, error, warning, info, debug, all };
+log_level get_log_level();
 void set_log_level(int level);
+bool is_log_level(log_level level);
 template<class T, class U>
 std::ostream& log_(std::ostream& os, const std::pair<T,U>&  opt);
 
@@ -201,13 +203,13 @@ namespace vt100 {
 
 
 template <class... Args> void log(Args &&...args) {
-  if (get_log_level() < 1)
+  if (is_log_level(log_level::debug))
     return;
   (log_(std::clog, args), ...);
 }
 
 template <class... Args> void logln(Args &&...args) {
-  if (get_log_level() < 1)
+  if (is_log_level(log_level::debug))
     return;
   (log_(std::clog, args), ...);
   std::clog << std::endl;
@@ -284,106 +286,107 @@ const auto SYMBOL_FIRST_CHAR =
 const auto SYMBOL_NEXT_CHAR =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789";
 
-int LOG_LEVEL = 0;
-int get_log_level() { return LOG_LEVEL; }
-void set_log_level(int level) { LOG_LEVEL = level; }
+volatile log_level LOG_LEVEL = log_level::none;
+log_level get_log_level() { return LOG_LEVEL; }
+void set_log_level(log_level level) { LOG_LEVEL = level; }
+bool is_log_level(log_level level) { return LOG_LEVEL < level; }
 
 std::fstream get_input(std::string filename, int argc, const char **argv) {
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-d") == 0)
-      set_log_level(1);
-    else
-      filename = argv[i];
-  }
+    set_log_level(log_level::debug);
+  else
+    filename = argv[i];
+}
 
-  std::fstream file(filename, std::ios::in);
-  if (!file.is_open()) {
-    std::cerr << "Could not open file " << filename << std::endl;
-    std::exit(1);
-  }
-  return file;
+std::fstream file(filename, std::ios::in);
+if (!file.is_open()) {
+  std::cerr << "Could not open file " << filename << std::endl;
+  std::exit(1);
+}
+return file;
 }
 
 size_t atoi(std::string_view str, size_t pos, size_t end) {
-  size_t result = 0;
-  for (size_t i = pos; i < end; ++i) {
-    result *= 10;
-    result += str[i] - '0';
-  }
-  return result;
+size_t result = 0;
+for (size_t i = pos; i < end; ++i) {
+  result *= 10;
+  result += str[i] - '0';
+}
+return result;
 }
 
 range find_range(std::string_view str, const char *pattern, size_t pos) {
-  auto begin = str.find_first_of(pattern, pos);
-  auto end = std::string_view::npos;
-  if (begin != std::string_view::npos) {
-    end = str.find_first_not_of(pattern, begin);
-    if (end == std::string_view::npos) {
-      end = str.size();
-    }
+auto begin = str.find_first_of(pattern, pos);
+auto end = std::string_view::npos;
+if (begin != std::string_view::npos) {
+  end = str.find_first_not_of(pattern, begin);
+  if (end == std::string_view::npos) {
+    end = str.size();
   }
-  return {begin, end};
+}
+return {begin, end};
 }
 
 bool isValid(range r) { return r.begin != std::string_view::npos; }
 
 std::optional<ranged<size_t>> next_number(std::string_view str, size_t pos) {
-  auto r = find_range(str, NUMBERS, pos);
-  if (isValid(r)) {
-    return {{atoi(str, r.begin, r.end), r}};
-  }
-  return {};
+auto r = find_range(str, NUMBERS, pos);
+if (isValid(r)) {
+  return {{atoi(str, r.begin, r.end), r}};
+}
+return {};
 }
 
 std::optional<ranged<std::string_view>> next_word(std::string_view str,
-                                                  size_t pos) {
-  auto r = find_range(str, LETTERS, pos);
-  if (isValid(r)) {
-    return {{str.substr(r.begin, r.end - r.begin), r}};
-  }
-  return {};
+                                                size_t pos) {
+auto r = find_range(str, LETTERS, pos);
+if (isValid(r)) {
+  return {{str.substr(r.begin, r.end - r.begin), r}};
+}
+return {};
 }
 
 std::optional<ranged<std::string_view>> next_symbol(std::string_view str,
-                                                    size_t pos) {
-  auto r = str.find_first_of(SYMBOL_FIRST_CHAR, pos);
-  if (r != std::string_view::npos) {
-    auto end = str.find_first_not_of(SYMBOL_NEXT_CHAR, r);
-    if (end == std::string_view::npos) {
-      end = str.size();
-    }
-    return {{str.substr(r, end - r), {r, end}}};
+                                                  size_t pos) {
+auto r = str.find_first_of(SYMBOL_FIRST_CHAR, pos);
+if (r != std::string_view::npos) {
+  auto end = str.find_first_not_of(SYMBOL_NEXT_CHAR, r);
+  if (end == std::string_view::npos) {
+    end = str.size();
   }
-  return {};
+  return {{str.substr(r, end - r), {r, end}}};
+}
+return {};
 }
 
 std::optional<ranged<std::string_view>>
 next_alnum_sequence(std::string_view str, size_t pos) {
-  auto r = std::find_if(str.begin() + pos, str.end(),
-                        [](char c) { return std::isalnum(c); });
-  if (r != str.end()) {
-    auto pos = std::distance(str.begin(), r);
-    auto end = std::find_if_not(str.begin() + pos, str.end(),
-                                [](char c) { return std::isalnum(c); });
-    auto d = std::distance(r, end);
-    return {{str.substr(pos, d), {size_t(pos), size_t(pos + d)}}};
-  }
-  return {};
+auto r = std::find_if(str.begin() + pos, str.end(),
+                      [](char c) { return std::isalnum(c); });
+if (r != str.end()) {
+  auto pos = std::distance(str.begin(), r);
+  auto end = std::find_if_not(str.begin() + pos, str.end(),
+                              [](char c) { return std::isalnum(c); });
+  auto d = std::distance(r, end);
+  return {{str.substr(pos, d), {size_t(pos), size_t(pos + d)}}};
+}
+return {};
 }
 
 template <class T>
 std::ostream &operator<<(std::ostream &os, const ranged<T> &r) {
-  return os << "{ " << r.value << " at " << r.position << " }";
+return os << "{ " << r.value << " at " << r.position << " }";
 }
 #endif
 
 inline size_t combine_ints(size_t left, size_t right) {
-  size_t t = right;
-  while (t > 0) {
-    left *= 10;
-    t /= 10;
-  }
-  return left + right;
+size_t t = right;
+while (t > 0) {
+  left *= 10;
+  t /= 10;
+}
+return left + right;
 }
 }
 

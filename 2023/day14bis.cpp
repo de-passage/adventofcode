@@ -1,8 +1,14 @@
 #include "coord.hpp"
 #include "utils.hpp"
+#include <unordered_map>
+
+// There's a lot of garbage in this file, most of it was to get the algorithms right.
+// I discovered that matrix index rotation is my nemesis and had a really hard time
+// getting the simulation right. The internal representation doesn't help, but it makes
+// the final computation easier. Marginally.
 
 constexpr auto coord_color = dpsg::vt100::green | dpsg::vt100::bold;
-constexpr auto in_coord_color = [](const auto& v) -> decltype(auto) {
+constexpr auto in_coord_color = [](const auto &v) -> decltype(auto) {
   return dpsg::vt100::generic_decorate{coord_color, v};
 };
 constexpr auto blocker_color = dpsg::vt100::red | dpsg::vt100::bold;
@@ -10,14 +16,16 @@ constexpr auto rock_color = dpsg::vt100::blue | dpsg::vt100::bold;
 constexpr auto counter_color = dpsg::vt100::yellow | dpsg::vt100::bold;
 constexpr auto empty_color = dpsg::vt100::faint;
 constexpr auto comment = dpsg::vt100::faint | dpsg::vt100::white;
+constexpr auto title_color = dpsg::vt100::bold | dpsg::vt100::underline |
+                             dpsg::vt100::black | bg(dpsg::vt100::color::white);
 
 namespace dpsg {
-  std::ostream &operator<<(std::ostream &out, basic_coord<size_t> c) {
-    using namespace dpsg::vt100;
-    out << coord_color << "(" << c.x << ',' << c.y << ")" << reset;
-    return out;
-  }
+std::ostream &operator<<(std::ostream &out, basic_coord<size_t> c) {
+  using namespace dpsg::vt100;
+  out << coord_color << "(" << c.x << ',' << c.y << ")" << reset;
+  return out;
 }
+} // namespace dpsg
 using coordz = dpsg::basic_coord<size_t>;
 
 enum class What {
@@ -59,10 +67,80 @@ std::ostream &operator<<(std::ostream &out, const mass_counter &c) {
 }
 
 struct dish_representation {
+  enum class Dir {
+    North,
+    West,
+    East,
+    South,
+  };
+
+  template <class T>
+  friend std::basic_ostream<T> &operator<<(std::basic_ostream<T> &out, Dir d) {
+    using namespace dpsg::vt100;
+    switch (d) {
+    case Dir::North:
+      out << "North";
+      break;
+    case Dir::West:
+      out << "West";
+      break;
+    case Dir::East:
+      out << "East";
+      break;
+    case Dir::South:
+      out << "South";
+      break;
+    }
+    return out;
+  }
+
+  inline void print_representation(std::ostream &out) {
+    using namespace dpsg;
+    auto orientation = directions[current_direction];
+
+    out << "Tilted " << orientation << std::endl;
+    if (orientation == Dir::North) {
+      for (auto row = 0u; row < line_count; ++row) {
+        for (auto col = 0u; col < line_count; ++col) {
+          out << at(line_count - col - 1, row);
+        }
+        out << std::endl;
+      }
+      out << std::endl;
+    } else if (orientation == Dir::West) {
+      for (auto row = 0u; row < line_count; ++row) {
+        for (auto col = 0u; col < line_count; ++col) {
+          out << at(row, col);
+        }
+        out << std::endl;
+      }
+      out << std::endl;
+    } else if (orientation == Dir::South) {
+      for (auto row = 0u; row < line_count; ++row) {
+        for (auto col = 0u; col < line_count; ++col) {
+          out << at(col, line_count - row - 1);
+        }
+        out << std::endl;
+      }
+      out << std::endl;
+    } else if (orientation == Dir::East) {
+      for (auto row = 0u; row < line_count; ++row) {
+        for (auto col = 0u; col < line_count; ++col) {
+          out << at(line_count - row - 1, line_count - col - 1);
+        }
+        out << std::endl;
+      }
+      out << std::endl;
+    }
+  };
+
   using subcontainer_type = std::vector<mass_counter>;
   using container_type = std::vector<subcontainer_type>;
   container_type data;
   size_t line_count;
+  constexpr static inline Dir directions[] = {Dir::North, Dir::East, Dir::South,
+                                              Dir::West};
+  int current_direction = 0;
 
   friend bool operator==(const dish_representation &lhs,
                          const dish_representation &rhs) {
@@ -95,7 +173,9 @@ struct dish_representation {
   }
 
   template <class T>
-  static std::basic_ostream<T>& print_array(std::basic_ostream<T>& out, const container_type& data, size_t line_count) {
+  static std::basic_ostream<T> &print_array(std::basic_ostream<T> &out,
+                                            const container_type &data,
+                                            size_t line_count) {
     for (auto &col : data) {
       size_t t = 0;
       for (auto &row_data : col) {
@@ -114,28 +194,46 @@ struct dish_representation {
         out << What::Empty;
       }
 
-      out << " -> "; dpsg::log_(out, col);
+      out << " -> ";
+      dpsg::log_(out, col);
       out << std::endl;
     }
     return out;
   }
 
   size_t current_load() const noexcept {
-    size_t mass = 0;
-    for (auto &v : data) {
-      for (auto &c : v) {
-        auto start_value = line_count - c.start;
-        auto s = start_value * (start_value + 1) / 2;
-        auto end_value = start_value - c.count;
-        auto e = end_value * (end_value + 1) / 2;
-        mass += s - e;
+    if (directions[current_direction] == Dir::North) {
+      size_t mass = 0;
+      for (auto &v : data) {
+        for (auto &c : v) {
+          auto start_value = line_count - c.start;
+          auto s = start_value * (start_value + 1) / 2;
+          auto end_value = start_value - c.count;
+          auto e = end_value * (end_value + 1) / 2;
+          mass += s - e;
+        }
       }
+      return mass;
+    } else if (directions[current_direction] == Dir::East) {
+      auto acc = 0;
+      for (auto i = 1uz; i <= data.size(); ++i) { // data is eastward, so north is the last line, the weights go up
+        auto &v = data[i - 1];
+        for (auto &c : v) {
+          acc += c.count * i;
+        }
+      }
+      return acc;
     }
-    return mass;
+    std::cerr << "Current load not implemented for " << directions[current_direction]
+              << std::endl;
+    std::exit(1);
   }
 
   // rotate counter-clockwise
   void tilt() {
+    using namespace dpsg;
+    using namespace dpsg::vt100;
+
     // Start at 1 because line 0 is filled with blockers
     std::vector<subcontainer_type::const_iterator>
         indices; // Index of the currently considered element each of the lines
@@ -147,68 +245,16 @@ struct dish_representation {
       indices.emplace_back(data[i].cbegin());
     }
 
-    // The data is represented as a list. Each element corresponds to a line of
-    // the visual representation. Each line is represented by a list of stopping
-    // points, each one of those is its position on the line (the outside of the
-    // visual is implicitely a blocker, but is not actually part of it, so 0
-    // must be dropped when tilting) and the number of elements held by the
-    // blocker.
-    //
-    // We need to tilt the representation in order, which means transposing the
-    // data counter-clockwise. Re-counting the number of elements held by each
-    // blocker will preserve the simulation we want. The columns are not
-    // explicit in the data so we have to compute them as we go.
-    //
-    // Example rotations
-    //
-    // #O.. -> {0, 0}, {1, 1}
-    // .#.# -> {0, 0}, {2, 0}, {4, 0}
-    // O.#. -> {0, 1}, {3, 0}
-    // OOO. -> {0, 3}
-    //
-    // .#.. -> {0, O}, {4, 0}
-    // ..#O -> {0, 0}, {3, 0}
-    // O#O. -> {0, 0}, {2, 0}
-    // #OO. -> {0, 1}, {3, 1}
-    //
-    // O...
-    // .#OO
-    // #.#O
-    // O..#
-    //
-    // OO.#
-    // O.#.
-    // .#..
-    // O.#O
-    //
-    // We can go over each column (1 to line_count), and for each line, check if
-    // the current index falls inside a group of blocked elements. This would be
-    // computed by checking if current_index > start && current_index <= start +
-    // count If current_value == start, then this is a new blocker, so we need
-    // to add it to the new container. To simplify knowing what group should be
-    // considered in the current line, we can keep a list of iterators to the
-    // current relevant group for each line. When the current column index
-    // exceed the current group count (start + count), we can increment the
-    // iterator
-
-    // basic transposition would be
-    // for (auto row = 0u; row < indices.size(); ++row) {
-    //  for (auto col = 0u; col < line_count; ++col) {
-    //    new_data[line_count - row - 1] = data[row][col];
-    //  }
-    // }
-    //
-    // In our case we don't have the columns, we only have indirect information
-    // about what would be in them.
-
-    using namespace dpsg;
-    using namespace dpsg::vt100;
-    for (auto row = 0u; row < indices.size(); ++row) {
+    log(title_color, "Rotating counter clockwise, direction ", blue,
+        directions[current_direction]);
+    current_direction = current_direction-- == 0 ? 3 : current_direction;
+    logln(title_color, " -> ", blue, directions[current_direction]);
+    for (auto col = 1u; col <= line_count; ++col) {
       logln("----------------------------------------");
       logln(*this);
-      for (auto col = 1u; col <= line_count; ++col) {
+      logln([&](auto &out) { print_array(out, new_container, line_count); });
+      for (int row = indices.size() - 1; row >= 0; --row) {
 
-        log("Considering ", coordz{col, row});
         auto &it = indices[row];
 
         if (it == data[row].cend()) { // There are no more blockers on this line
@@ -217,15 +263,21 @@ struct dish_representation {
         }
         auto current = *it;
 
-        logln(" => current blocker is ", current, " in ", data[row]);
+        auto new_row = col - 1;
+        auto new_col = line_count - row - 1;
+        logln("Considering col ", in_coord_color(col), " transposed to row ", in_coord_color(new_row),
+              " and row ", in_coord_color(row), " transposed to col ", in_coord_color(new_col), " with current blocker: ", *it,
+              reset);
 
         if (col < current.start) { // We haven't reached the next blocker yet
-          logln("We haven't reached the next blocker yet");
+          logln(comment, "We haven't reached the next blocker yet", reset);
           continue;
         }
 
         while (current.start + current.count < col) {
-          logln(comment, " -> -> Incrementing the current blocker iterator since current.count "
+          logln(comment,
+                " -> -> Incrementing the current blocker iterator since "
+                "current.count "
                 "< col (",
                 (current.start + current.count), " < ", col, ")", reset);
           ++it;
@@ -235,49 +287,54 @@ struct dish_representation {
           }
           current = *it;
         }
-        logln("Current blocker is ", current, ", col ", (green|bold), col,
-              reset, " transposed to ", (green|bold), col, reset);
-        if (current.start == col) { // We are on the new blocker, we can add it
-                                    // to the new container
-          logln(comment, "-> We are on a ", rock_color, "new blocker", comment, " we can add it to the new container");
-          new_container[col - 1].push_back({
+
+        logln("Current blocker is ", current, ", col ", (green | bold), col, reset);
+        if (current.start == static_cast<size_t>(col)) { // We are on the new blocker, we can add
+                                        // it to the new container
+          logln(comment, "-> We are on a ", rock_color, "new blocker", comment,
+                " we can add it to the new container", reset);
+          new_container[new_row].push_back({
               .start = line_count - row,
               .count = 0,
           });
-        } else if (current.start < col &&
-                   current.start + current.count >= col) {
-          logln(comment, "-> ", blocker_color, "Incrementing", comment ,", the current blocker count", reset);
-          new_container[col - 1].back().count++;
+        } else if (current.start < static_cast<size_t>(col) &&
+                   static_cast<size_t>(col) <= current.start + current.count) {
+          new_container[new_row].back().count++;
+          logln(comment, "-> ", blocker_color, "Incrementing", comment,
+                ", the current blocker count to ", new_container[new_row].back(), reset);
         } else {
           logln(comment, "Nothing to do here", reset);
         }
-
-        logln("=> New container is now\n", [&](auto &out) {
-          for (auto &c : new_container) {
-            log_(out, c);
-            out << '\n';
-          }
-        });
+next_line:;
       }
-    next_line:;
+      logln([&](auto &out) { print_array(out, new_container, line_count); });
+      logln("----------------------------------------");
     }
 
+    logln(bold | underline | black | bg(color::white), "Swapping containers",
+          reset);
+    logln(*this);
+    logln([&](auto &out) { print_array(out, new_container, line_count); });
     std::swap(new_container, data);
   }
 
   // rotate clockwise
   void rtilt() {
+    using namespace dpsg;
+    using namespace dpsg::vt100;
+
+    log(title_color, "Rotating clockwise, direction ", blue,
+        directions[current_direction]);
+    current_direction = (current_direction + 1) % 4;
+    logln(title_color, " -> ", blue, directions[current_direction]);
+
     std::vector<subcontainer_type::const_iterator>
         indices; // Index of the last blocker seen on the original data
     container_type new_container(line_count);
     for (auto i = 0u; i < line_count; ++i) {
-      indices.emplace_back(
-          data[i].cbegin());
-          new_container[i].emplace_back();
+      indices.emplace_back(data[i].cbegin());
+      new_container[i].emplace_back();
     }
-
-    using namespace dpsg;
-    using namespace dpsg::vt100;
 
     // we want to build the new container where each line corresponds to a
     // column in the original data To do this, we traverse the colums in reverse
@@ -286,19 +343,20 @@ struct dish_representation {
       auto &dest = new_container[line_count - dest_row - 1];
       logln("----------------------------------------");
       logln(*this);
-      logln([&](auto &out) {
-          print_array(out, new_container, line_count);
-          });
+      logln([&](auto &out) { print_array(out, new_container, line_count); });
 
       // Columns are not explicitely represented in the data, we need to compute
       // them. We can do this by going over each line. At every point we keep
       // track of the current relevant blocker.
       for (auto orig_row = 0uz; orig_row < line_count; orig_row++) {
         auto &it = indices[orig_row];
-        logln("Considering original row ", in_coord_color(orig_row), " and dest row: " , in_coord_color(dest_row), " with current blocker: ", *it, reset);
+        logln("Considering original row ", in_coord_color(orig_row),
+              " and dest row: ", in_coord_color(dest_row),
+              " with current blocker: ", *it, reset);
 
-        if (it == data[orig_row].cend()) { // There are no more blockers on this line
-          logln(decorate{comment," => No more blockers on this line"});
+        if (it ==
+            data[orig_row].cend()) { // There are no more blockers on this line
+          logln(decorate{comment, " => No more blockers on this line"});
           continue;
         }
 
@@ -310,9 +368,12 @@ struct dish_representation {
 
         auto current = *it; // The current blocker
         while (current_col > current.start + current.count) {
-          logln(comment, "--> Incrementing the current blocker iterator since current_col "
-                "> current.start + current.count (",
-                green, current_col, " > ", (current.start + current.count), white, ") ");
+          logln(
+              comment,
+              "--> Incrementing the current blocker iterator since current_col "
+              "> current.start + current.count (",
+              green, current_col, " > ", (current.start + current.count), white,
+              ") ");
           ++it;
           if (it == data[orig_row].cend()) {
             logln(underline, "No more blockers on this line", reset);
@@ -324,41 +385,38 @@ struct dish_representation {
 
         if (current.start == current_col) { // We are on the new blocker, we can
                                             // add it to the new container
-          logln(comment, "-> We are on a ", blocker_color, "new blocker", reset|comment, " we can add it to the new container", reset);
           dest.push_back({
-              .start = orig_row,
+              .start = orig_row + 1,
               .count = 0,
           });
+          logln(comment, "-> We are on a ", blocker_color, "new blocker",
+                reset | comment, " we can add it to the new container -> ",
+                yellow, dest.back(), reset);
         } else if (current.start < current_col &&
                    current_col <= current.start + current.count) {
-          logln(comment, "-> ", rock_color, "Incrementing", reset|comment, ", the current blocker count", reset);
+          logln(comment, "-> ", rock_color, "Incrementing", reset | comment,
+                ", the current blocker count", reset);
           dest.back().count++;
         } else {
           logln(comment, "Nothing to do here", reset);
         }
-next_line:;
+      next_line:;
       } // inner loop
-      logln([&](auto &out) {
-          print_array(out, new_container, line_count);
-          });
+      logln([&](auto &out) { print_array(out, new_container, line_count); });
       logln("----------------------------------------");
     } // outer loop
-    logln(bold|underline|black|bg(color::white), "Swapping containers", reset);
+    logln(bold | underline | black | bg(color::white), "Swapping containers",
+          reset);
+    logln(*this);
+    logln([&](auto &out) { print_array(out, new_container, line_count); });
     std::swap(new_container, data);
   }
 
   void cycle() {
     for (int i = 0; i < 4; ++i) {
-      rtilt();
+      tilt();
     }
   }
-};
-
-enum class Dir {
-  North,
-  West,
-  East,
-  South,
 };
 
 int main(int argc, const char **argv) {
@@ -391,58 +449,56 @@ int main(int argc, const char **argv) {
       }
     }
   }
+  //data.print_representation(std::cout);
+  data.tilt();
+  //data.print_representation(std::cout);
+  data.tilt();
+  //data.print_representation(std::cout);
+  data.tilt();
+  //std::cout << "After 1 cycle: \n";
+  //data.print_representation(std::cout);
 
-  auto p = [](const auto &data, Dir orientation) {
-    if (orientation == Dir::North) {
-      logln("Printing ", vt100::cyan, "north");
-      std::cout << data << std::endl;
-      for (auto row = 0u; row < data.line_count; ++row) {
-        for (auto col = 0u; col < data.line_count; ++col) {
-          std::cout << data.at(data.line_count - col - 1, row);
+  constexpr auto ITERATIONS = 1000000000;
+  std::vector<int> loads;
+  loads.emplace_back(data.current_load());
+  std::unordered_map<int, std::vector<size_t>> number_indices; // not using multimap because I don't want to look up whether relative order is preserved
+  number_indices.emplace(loads.back(), 0);
+  for (int iteration = 2; iteration <= ITERATIONS; ++iteration) {
+    data.cycle();
+    auto load = data.current_load();
+    loads.push_back(load);
+
+
+    auto& vec = number_indices[load];
+    for(auto it = vec.rbegin(); it != vec.rend(); ++it) {
+      // look for a cycle. A cycle is defined as a sequence of numbers identical to the
+      // end sequence of the array that stretchs for the length of the distance between the
+      // last element and the matching element.
+      // For example, if the array is [1,2,3,4,5,6,7,8,10,9,10,7,8,10,9,10], the cycle is
+      // [7,8,10,9,10], found by looking at each 10 starting from the end, and testing numbers in
+      // the array in reverse as long as they match. If we reach the matching index, we have a cycle
+
+      auto met_idx = *it;
+      auto last_idx = iteration - 1;
+
+      for (auto i = 0u; i < (last_idx - met_idx); ++i) {
+        auto left = loads[last_idx - i];
+        auto right = loads[met_idx - i];
+        if (left != right) {
+          goto next;
         }
-        std::cout << std::endl;
       }
-      std::cout << std::endl;
-    } else if (orientation == Dir::West) {
-      logln("Printing ", vt100::cyan, "west");
-      cout << data << std::endl;
-      for (auto row = 0u; row < data.line_count; ++row) {
-        for (auto col = 0u; col < data.line_count; ++col) {
-          std::cout << data.at(col, row);
-        }
-        std::cout << std::endl;
-      }
-      std::cout << std::endl;
-    } else if (orientation == Dir::South) {
-      logln("Printing ", vt100::cyan, "south");
-      std::cout << data << std::endl;
-      for (auto row = 0u; row < data.line_count; ++row) {
-        for (auto col = 0u; col < data.line_count; ++col) {
-          std::cout << data.at(col, data.line_count - row - 1);
-        }
-        std::cout << std::endl;
-      }
-      std::cout << std::endl;
-    } else if (orientation == Dir::East) {
-      logln("Printing ", vt100::cyan, "east");
-      std::cout << data << std::endl;
-      for (auto row = 0u; row < data.line_count; ++row) {
-        for (auto col = 0u; col < data.line_count; ++col) {
-          std::cout << data.at(data.line_count - row - 1,
-                               data.line_count - col - 1);
-        }
-        std::cout << std::endl;
-      }
-      std::cout << std::endl;
+      // we have a cycle
+
+      auto cycle_length = last_idx - met_idx;
+      // We can now compute the value of the element at iteration 1 billion
+
+
     }
-  };
-  p(data, Dir::North);
-  data.rtilt();
-  p(data, Dir::West);
-  // data.rtilt();
-  // p(data, Dir::South);
-  // data.rtilt();
-  // p(data, Dir::East);
-  //
+
+next: vec.push_back(iteration - 1);
+  }
+done:
+
   return 0;
 }
