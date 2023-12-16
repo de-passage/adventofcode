@@ -463,6 +463,7 @@ int main(int argc, const char **argv) {
   loads.emplace_back(data.current_load());
   std::unordered_map<int, std::vector<size_t>> number_indices; // not using multimap because I don't want to look up whether relative order is preserved
   number_indices.emplace(loads.back(), 0);
+  auto last = loads.back();
   for (int iteration = 2; iteration <= ITERATIONS; ++iteration) {
     data.cycle();
     auto load = data.current_load();
@@ -470,6 +471,10 @@ int main(int argc, const char **argv) {
 
 
     auto& vec = number_indices[load];
+    if (load == last) {
+      continue;
+    }
+    last = load;
     for(auto it = vec.rbegin(); it != vec.rend(); ++it) {
       // look for a cycle. A cycle is defined as a sequence of numbers identical to the
       // end sequence of the array that stretchs for the length of the distance between the
@@ -491,8 +496,15 @@ int main(int argc, const char **argv) {
       // we have a cycle
 
       auto cycle_length = last_idx - met_idx;
+      std::cout << "Found cycle of length " << cycle_length << " starting at " << met_idx << std::endl;
+      for (auto i = 0u; i < cycle_length; ++i) {
+        std::cout << loads[last_idx - i] << ' ';
+      }
       // We can now compute the value of the element at iteration 1 billion
+      auto steps_in_cycle = (ITERATIONS - met_idx) % cycle_length;
+      std::cout << " => " << loads[met_idx + steps_in_cycle - 1] << std::endl;
 
+      goto done;
 
     }
 
