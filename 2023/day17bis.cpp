@@ -155,7 +155,7 @@ int main(int argc, const char **argv) {
         next.y >= static_cast<int>(grid[0].size())) {
       return;
     }
-    if (current_node.direction == dir && current_node.steps >= 10) {
+    if (current_node.direction == dir && current_node.steps >= 9) {
       return;
     }
     if (current_node.direction != dir && current_node.steps < 3) {
@@ -204,22 +204,21 @@ int main(int argc, const char **argv) {
 
     auto [x, y] = current.pos;
 
-    auto up = coordinates{x - 1, y};
-    auto down = coordinates{x + 1, y};
-    auto left = coordinates{x, y - 1};
-    auto right = coordinates{x, y + 1};
-
     if (current.direction != direction::down) {
-        create_new_node_if_valid(current, up, direction::up);
+      auto up = coordinates{x - 1, y};
+      create_new_node_if_valid(current, up, direction::up);
     }
     if (current.direction != direction::up) {
-        create_new_node_if_valid(current, down, direction::down);
+      auto down = coordinates{x + 1, y};
+      create_new_node_if_valid(current, down, direction::down);
     }
     if (current.direction != direction::right) {
-        create_new_node_if_valid(current, left, direction::left);
+      auto left = coordinates{x, y - 1};
+      create_new_node_if_valid(current, left, direction::left);
     }
     if (current.direction != direction::left) {
-        create_new_node_if_valid(current, right, direction::right);
+      auto right = coordinates{x, y + 1};
+      create_new_node_if_valid(current, right, direction::right);
     }
   }
 }
