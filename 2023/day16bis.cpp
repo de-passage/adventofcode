@@ -2,6 +2,9 @@
 #include "utils.hpp"
 #include "day16.hpp"
 
+#include <algorithm>
+#include <queue>
+
 int main(int argc, const char **argv) {
   using namespace std;
   using namespace dpsg;
@@ -36,9 +39,17 @@ int main(int argc, const char **argv) {
     }
   }
 
-  auto count = count_energized_tiles(map, ray { .pos = {0, 0}, .origin = ray_origin::left });
+  auto count = 0ul;
+  for (auto i = 0u; i < map.size(); ++i) {
+    count = std::max(count_energized_tiles(map, {.pos = {i, 0}, .origin = ray_origin::left}), count);
+    count = std::max(count_energized_tiles(map, {.pos = {i, map[i].size() - 1}, .origin = ray_origin::right}), count);
+  }
+  for (auto i = 0u; i < map[0].size(); ++i) {
+    count = std::max(count_energized_tiles(map, {.pos = {0, i}, .origin = ray_origin::up}), count);
+    count = std::max(count_energized_tiles(map, {.pos = {map.size() - 1, i}, .origin = ray_origin::down}), count);
+  }
 
-  std::cout << "Total cells energized: " << (vt100::bold | vt100::green) << count << vt100::reset << std::endl;
+  std::cout << "Max cells energized: " << (vt100::bold | vt100::green) << count << vt100::reset << std::endl;
 
   return 0;
 }
