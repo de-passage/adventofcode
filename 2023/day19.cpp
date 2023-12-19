@@ -207,8 +207,6 @@ int main(int argc, const char** argv) {
 
   string line;
 
-  rule_set rules;
-
   unordered_map<string, rule_set> rule_map;
 
   // parsing rules
