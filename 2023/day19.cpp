@@ -77,12 +77,6 @@ std::ostream& operator<<(std::ostream& out, const std::unique_ptr<basic_rule>& p
 using rule_ptr = std::unique_ptr<basic_rule>;
 using rule_set = std::vector<rule_ptr>;
 
-template<class T>
-struct parse_result {
-  T value;
-  std::string_view rest;
-};
-
 rule_ptr parse_rule(std::string_view str) {
   auto op_pos = str.find_first_of("><");
 
@@ -197,13 +191,11 @@ part parse_part(std::string_view str) {
 }
 
 
-int main(int argc, const char** argv) {
+DPSG_AOC_MAIN(input) {
 
   using namespace std;
   using namespace dpsg;
   using namespace dpsg::vt100;
-
-  auto input = get_input("day19.txt", argc, argv);
 
   string line;
 

@@ -395,6 +395,33 @@ while (t > 0) {
 }
 return left + right;
 }
+
+namespace detail {
+  inline std::string prepare_file_name(std::string_view file) {
+    auto pos = file.find_last_of('/');
+    if (pos != std::string_view::npos) {
+      file.remove_prefix(pos + 1);
+    }
+    if (file.substr(0,3) != "day") {
+      return std::string{file} + ".txt";
+    }
+    pos = file.find_first_not_of("0123456789", 3);
+    return std::string{file.substr(0, pos)} + ".txt";
+  }
 }
+}
+
+
+
+#define DPSG_AOC_MAIN(filevar)  \
+  namespace dpsg::detail { \
+    void aoc_main(auto&& filevar);  \
+  } \
+  int main(int argc, const char** argv) { \
+    auto filevar = dpsg::get_input(dpsg::detail::prepare_file_name(__BASE_FILE__), argc, argv); \
+    dpsg::detail::aoc_main(filevar); \
+  } \
+  void dpsg::detail::aoc_main(auto&& filevar)
+
 
 #endif // HEADER_GUARD_UTILS_HPP

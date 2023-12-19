@@ -246,13 +246,12 @@ size_t combinations_for(part_combination p) {
   return acc;
 }
 
-int main(int argc, const char **argv) {
+DPSG_AOC_MAIN(file) {
 
   using namespace std;
   using namespace dpsg;
   using namespace dpsg::vt100;
 
-  auto file = get_input("day19.txt", argc, argv);
   string line;
   unordered_map<string, rule_set> rule_map;
 
