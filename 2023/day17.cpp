@@ -45,11 +45,11 @@ struct std::hash<directed_coordinates_and_steps> {
   }
 };
 
-template <typename T> struct decorated { const T &obj; };
-template <typename T> decorated(T &) -> decorated<T>;
-template <typename T> decorated(const T &) -> decorated<T>;
+template <typename T> struct colored { const T &obj; };
+template <typename T> colored(T &) -> colored<T>;
+template <typename T> colored(const T &) -> colored<T>;
 
-std::ostream &operator<<(std::ostream &os, decorated<direction> d) {
+std::ostream &operator<<(std::ostream &os, colored<direction> d) {
   using namespace dpsg::vt100;
   switch (d.obj) {
   case direction::up:
@@ -63,7 +63,7 @@ std::ostream &operator<<(std::ostream &os, decorated<direction> d) {
   }
 }
 
-std::ostream &operator<<(std::ostream &os, decorated<directed_coordinates> d) {
+std::ostream &operator<<(std::ostream &os, colored<directed_coordinates> d) {
   using namespace dpsg::vt100;
   switch (d.obj.dir) {
   case direction::up:
@@ -154,7 +154,7 @@ int main(int argc, const char **argv) {
   auto create_new_node_if_valid = [&](const node &current_node,
                                       coordinates next, direction dir) {
     using namespace dpsg::vt100;
-    log(faint, "Considering adding ", (yellow|bold), next, (reset|faint), " with direction ", decorated{dir});
+    log(faint, "Considering adding ", (yellow|bold), next, (reset|faint), " with direction ", colored{dir});
     if (next.x < 0 || next.y < 0 || next.x >= static_cast<int>(grid.size()) ||
         next.y >= static_cast<int>(grid[0].size())) {
       logln(" -> ", faint|red, "Out of bounds", reset);
@@ -204,13 +204,13 @@ int main(int argc, const char **argv) {
           if (coordinates{static_cast<int>(i), static_cast<int>(j)} ==
               current.pos) {
             out << (vt100::reset | vt100::red | vt100::bold)
-                << decorated{current.direction};
+                << colored{current.direction};
             found = true;
           } else {
             for (auto &n : current_path) {
               if (n.pos ==
                   coordinates{static_cast<int>(i), static_cast<int>(j)}) {
-                out << (vt100::magenta|vt100::bold) << decorated{n.dir};
+                out << (vt100::magenta|vt100::bold) << colored{n.dir};
                 found = true;
               }
             }

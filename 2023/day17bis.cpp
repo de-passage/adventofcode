@@ -44,11 +44,11 @@ template <> struct std::hash<directed_coordinates_and_steps> {
   }
 };
 
-template <typename T> struct decorated { const T &obj; };
-template <typename T> decorated(T &) -> decorated<T>;
-template <typename T> decorated(const T &) -> decorated<T>;
+template <typename T> struct colored { const T &obj; };
+template <typename T> colored(T &) -> colored<T>;
+template <typename T> colored(const T &) -> colored<T>;
 
-std::ostream &operator<<(std::ostream &os, decorated<direction> d) {
+std::ostream &operator<<(std::ostream &os, colored<direction> d) {
   using namespace dpsg::vt100;
   switch (d.obj) {
   case direction::up:
@@ -62,7 +62,7 @@ std::ostream &operator<<(std::ostream &os, decorated<direction> d) {
   }
 }
 
-std::ostream &operator<<(std::ostream &os, decorated<directed_coordinates> d) {
+std::ostream &operator<<(std::ostream &os, colored<directed_coordinates> d) {
   using namespace dpsg::vt100;
   switch (d.obj.dir) {
   case direction::up:

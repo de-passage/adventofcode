@@ -61,6 +61,13 @@ template <class T> std::ostream &log_(std::ostream &os, const T &r) {
   return os << r;
 }
 
+inline std::ostream& log_(std::ostream& os, const std::string_view&  str) {
+  return os << str;
+}
+inline std::ostream& log_(std::ostream& os, const std::string&  str) {
+  return os << str;
+}
+
 template <class F,
           std::enable_if_t<std::is_invocable_v<std::decay_t<F>>, int> = 0>
 std::ostream &log_(std::ostream &os, F &&f) {
