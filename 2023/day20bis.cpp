@@ -1,5 +1,6 @@
 #include "utils.hpp"
 
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -42,10 +43,10 @@ private:
 struct basic_module {
 private:
   module_map *ports;
-
-protected:
   module_list _outputs;
   module_list _inputs;
+
+protected:
   std::string _name;
 
   basic_module(module_map *ports, std::string name)
@@ -69,6 +70,12 @@ public:
   virtual void receive(const std::string &from, pulse p) = 0;
   virtual ~basic_module() = default;
   virtual bool is_in_initial_state() const = 0;
+
+  const module_list &outputs() const { return _outputs; }
+  const module_list &inputs() const { return _inputs; }
+  const std::string &name() const { return _name; }
+
+  virtual char repr() const { return '?'; }
 };
 
 void module_map::_do_pulse(const std::string &from, const std::string &to,
@@ -100,6 +107,8 @@ struct broadcaster : basic_module {
 
   virtual void receive(const std::string &, pulse p) override { send(p); }
   virtual bool is_in_initial_state() const override { return true; }
+
+  virtual char repr() const override { return '='; }
 };
 
 struct flip_flop : basic_module {
@@ -125,6 +134,24 @@ struct flip_flop : basic_module {
   virtual bool is_in_initial_state() const override {
     return state == state::off;
   }
+  virtual char repr() const override { return '%'; }
+};
+
+struct rx_module : basic_module {
+  rx_module(module_map *map) : basic_module(map, "rx") {}
+
+  size_t low_received = 0;
+
+  virtual void receive(const std::string &, pulse p) override {
+    if (p == pulse::low) {
+      low_received += 1;
+    }
+  }
+
+  void reset() { low_received = 0; }
+
+  virtual bool is_in_initial_state() const override { return true; }
+  virtual char repr() const override { return '!'; }
 };
 
 struct conjunction : basic_module {
@@ -139,7 +166,7 @@ struct conjunction : basic_module {
       send_high();
     } else {
       inputs_state.insert(from);
-      if (inputs_state.size() == _inputs.size()) {
+      if (inputs_state.size() == inputs().size()) {
         send_low();
       } else {
         send_high();
@@ -150,6 +177,8 @@ struct conjunction : basic_module {
   virtual bool is_in_initial_state() const override {
     return inputs_state.empty();
   }
+
+  virtual char repr() const override { return '&'; }
 };
 
 std::vector<std::string> parse_outputs(std::string_view line) {
@@ -206,6 +235,8 @@ DPSG_AOC_MAIN(file) {
     }
   }
 
+  rx_module *rx = nullptr;
+
   for (auto &[name, outputs] : connections) {
     logln("Connecting module ", (bold | green), name, reset, " to ",
           (bold | yellow), outputs, reset);
@@ -214,32 +245,87 @@ DPSG_AOC_MAIN(file) {
       auto module_it = modules.modules.find(output);
       if (module_it == modules.modules.end()) {
         logln("Creating module ", (bold | green), output, reset);
-        module_it =
-            modules.modules
-                .emplace(output, make_unique<debug_module>(&modules, output))
-                .first;
+        if (output == "rx") {
+          auto rx_mod = make_unique<rx_module>(&modules);
+          rx = rx_mod.get();
+          module_it = modules.modules.emplace(output, move(rx_mod)).first;
+        } else {
+          module_it =
+              modules.modules
+                  .emplace(output, make_unique<debug_module>(&modules, output))
+                  .first;
+        }
       }
       connect(*module, *modules.modules.at(module_it->first));
     }
   }
 
-  auto it = 0;
+  unordered_multimap<char, basic_module *> repr_to_module;
 
-  do {
-    modules.pulse("button", "broadcaster", pulse::low);
-    while (modules.process_pulse()) { /* nothing more to do here */
-    }
-    logln("Pulse count at iteration ", (bold | blue), ++it, reset, " : low pulses ",
-          (bold | green), modules.low_count(), reset, " / ", (bold | red), modules.high_count(), reset, " high pulses\n");
-  } while (
-      !std::all_of(modules.modules.begin(), modules.modules.end(),
-                   [](auto &p) { return p.second->is_in_initial_state(); }) && it < 1000);
+  for (auto &p : modules.modules) {
+    auto &module = p.second;
+    auto &name = p.first;
+    logln("Module ", (bold | green), name, reset, ": ", (bold | cyan),
+          module->inputs(), (bold | yellow), ' ', module->repr(), ' ',
+          (bold | magenta), module->outputs(), reset);
+    repr_to_module.emplace(module->repr(), module.get());
+  }
 
-  auto mult = 1000 / it;
-  auto low_count = modules.low_count() * mult;
-  auto high_count = modules.high_count() * mult;
+  logln(
+      "Broadcasters: ", (bold | green),
+      [&](auto &out) {
+        auto range = repr_to_module.equal_range('=');
+        for (auto it = range.first; it != range.second; ++it) {
+          auto &module = it->second;
+          if (it != range.first) {
+            out << ", ";
+          }
+          log_(out, module->name());
+        }
+      },
+      reset);
 
-  logln("Low pulses: ", (bold | green), low_count, reset, " / ", (bold | red), high_count, reset, " high pulses");
+  logln(
+      "Flip flops: ",
+      [&](auto &out) {
+        auto range = repr_to_module.equal_range('%');
+        auto d = std::distance(range.first, range.second);
+        out << '(' << d << ") "
+            << (bold | green);
 
-  std::cout << "Total: " << low_count * high_count << '\n';
+        auto step = 255 / (d + 1);
+        auto c = 0;
+
+        for (auto it = range.first; it != range.second; ++it) {
+          auto &module = it->second;
+          if (it != range.first) {
+            out << ", ";
+          }
+          out << (bold|setf(c, 100, 100)) << module->name();
+          c += step;
+        }
+      },
+      reset);
+  logln(
+      "Conjunctions: ",
+      [&](auto &out) {
+        auto range = repr_to_module.equal_range('&');
+        auto d = std::distance(range.first, range.second);
+        out << '(' << d << ") ";
+
+        auto step = 255 / (d + 1);
+        auto c = 0;
+
+        for (auto it = range.first; it != range.second; ++it) {
+          auto &module = it->second;
+          if (it != range.first) {
+            out << ", ";
+          }
+          out << (bold|setf(100, c, 100)) << module->name();
+          c += step;
+        }
+      },
+      reset);
+
+  cout << get_cursor << endl;
 }

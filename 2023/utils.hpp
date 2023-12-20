@@ -2,6 +2,8 @@
 #define HEADER_GUARD_UTILS_HPP
 
 #include "range.hpp"
+#include "vt100.hpp"
+
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
@@ -123,99 +125,6 @@ std::ostream& log_(std::ostream& os, const std::tuple<Args...>& t) {
     ((log_(os, args), os << ", "), ...);
   }, t);
   return os << "}";
-}
-
-namespace vt100 {
-  enum class color: uint8_t {
-    black = 0,
-    red,
-    green,
-    yellow,
-    blue,
-    magenta,
-    cyan,
-    white,
-  };
-
-
-  template<size_t S>
-    struct termcode_sequence {
-      uint8_t codes[S];
-    };
-
-  using termcode = termcode_sequence<1>;
-
-
-  static constexpr termcode reset{0};
-
-  inline constexpr termcode bg(color c) noexcept {
-    return termcode{static_cast<uint8_t>(static_cast<uint8_t>(c) + 40)};
-  }
-  inline constexpr termcode fg(color c) noexcept {
-    return termcode{static_cast<uint8_t>(static_cast<uint8_t>(c) + 30)};
-  }
-
-  static constexpr inline auto green = fg(color::green);
-  static constexpr inline auto red = fg(color::red);
-  static constexpr inline auto black = fg(color::black);
-  static constexpr inline auto blue = fg(color::blue);
-  static constexpr inline auto cyan = fg(color::cyan);
-  static constexpr inline auto magenta = fg(color::magenta);
-  static constexpr inline auto yellow = fg(color::yellow);
-  static constexpr inline auto white = fg(color::white);
-  static constexpr inline termcode bold{1};
-  static constexpr inline termcode faint{2};
-  static constexpr inline termcode italic{3};
-  static constexpr inline termcode underline{4};
-  static constexpr inline termcode blink{5};
-  static constexpr inline termcode reverse{7};
-  static constexpr inline termcode conceal{8};
-  static constexpr inline termcode crossed{9};
-
-  namespace detail {
-    template<size_t ...I1, size_t ...I2>
-      constexpr auto concat_impl(termcode_sequence<sizeof...(I1)> t1, termcode_sequence<sizeof...(I2)> t2, std::index_sequence<I1...>, std::index_sequence<I2...>) noexcept {
-        return termcode_sequence<sizeof...(I1) + sizeof...(I2)>{
-          .codes = {t1.codes[I1]..., t2.codes[I2]...}
-        };
-      }
-  }
-
-  template<size_t S1, size_t S2>
-    constexpr auto operator|(termcode_sequence<S1> s1, termcode_sequence<S2> s2) noexcept {
-      return detail::concat_impl(s1, s2, std::make_index_sequence<S1>{}, std::make_index_sequence<S2>{});
-    }
-
-  template<size_t S, std::enable_if_t<(S > 1), int> = 0>
-    std::ostream& operator<<(std::ostream& os, const termcode_sequence<S>& s) {
-      os << "\033[" << static_cast<int>(s.codes[0]);
-      for (auto i = 1uz; i < S; ++i) {
-        os << ';' << static_cast<int>(s.codes[i]);
-      }
-      return os << "m";
-    }
-
-    inline std::ostream& operator<<(std::ostream& os, termcode s) {
-      return os << "\033[" << static_cast<int>(s.codes[0]) << "m";
-    }
-
-  template<size_t S, typename T>
-    struct generic_decorate {
-      termcode_sequence<S> codes;
-      T value;
-    };
-  template<size_t S, typename T>
-    generic_decorate(termcode_sequence<S>, T) -> generic_decorate<S, T>;
-
-  template<size_t S>
-    struct decorate : generic_decorate<S, std::string_view> {};
-  template<size_t S>
-    decorate(termcode_sequence<S>, std::string_view) -> decorate<S>;
-
-  template<size_t S, typename T>
-    std::ostream& operator<<(std::ostream& os, const generic_decorate<S, T>& d) {
-      return os << d.codes << d.value << reset;
-    }
 }
 
 
