@@ -27,17 +27,17 @@ namespace dpsg::vt100 {
 
     template<class ...Ts, class ...Us>
       constexpr auto operator|(termcode_tuple<Ts...> t1, termcode_tuple<Us...> t2) noexcept {
-        return termcode_tuple{std::tuple_cat(t1, t2)};
+        return termcode_tuple{std::tuple_cat(static_cast<std::tuple<Ts...>>(t1), static_cas<std::tuple<Us...>>(t2))};
       }
 
     template<class ...Ts, size_t S, char E>
       constexpr auto operator|(termcode_tuple<Ts...> t1, termcode_sequence<S, E> t2) noexcept {
-        return termcode_tuple{std::tuple_cat(t1, std::make_tuple(t2))};
+        return termcode_tuple{std::tuple_cat(static_cast<std::tuple<Ts...>>(t1), std::make_tuple(t2))};
       }
 
     template<class ...Ts, size_t S, char E>
       constexpr auto operator|(termcode_sequence<S, E> t1, termcode_tuple<Ts...> t2) noexcept {
-        return termcode_tuple{std::tuple_cat(std::make_tuple(t1), t2)};
+        return termcode_tuple{std::tuple_cat(std::make_tuple(t1), static_cast<std::tuple<Ts...>>(t2))};
       }
 
     template<std::size_t ...I1, std::size_t ...I2, char End>
@@ -142,29 +142,26 @@ namespace dpsg::vt100 {
 
   // CURSOR MANIPULATION
 
-  inline constexpr auto cursor_up(std::size_t n) noexcept {
-    return termcode_sequence<1, 'A'>{static_cast<uint8_t>(n)};
+  inline constexpr auto cursor_up(uint8_t n) noexcept {
+    return termcode_sequence<1, 'A'>{n};
   }
-  inline constexpr auto cursor_down(std::size_t n) noexcept {
-    return termcode_sequence<1, 'B'>{static_cast<uint8_t>(n)};
+  inline constexpr auto cursor_down(uint8_t n) noexcept {
+    return termcode_sequence<1, 'B'>{n};
   }
-  inline constexpr auto cursor_forward(std::size_t n) noexcept {
-    return termcode_sequence<1, 'C'>{static_cast<uint8_t>(n)};
+  inline constexpr auto cursor_forward(uint8_t n) noexcept {
+    return termcode_sequence<1, 'C'>{n};
   }
-  inline constexpr auto cursor_backward(std::size_t n) noexcept {
-    return termcode_sequence<1, 'D'>{static_cast<uint8_t>(n)};
-  }
-
-  inline constexpr auto set_cursor(std::size_t x, std::size_t y) noexcept {
-    return termcode_sequence<2, 'H'>{static_cast<uint8_t>(x), static_cast<uint8_t>(y)};
+  inline constexpr auto cursor_backward(uint8_t n) noexcept {
+    return termcode_sequence<1, 'D'>{n};
   }
 
-  static constexpr inline termcode<'n'> get_cursor{'6'};
-  static constexpr inline single_termcode<'s'> save_cursor{};
-  static constexpr inline single_termcode<'u'> restore_cursor{};
+  inline constexpr auto set_cursor(uint8_t x, uint8_t y) noexcept {
+    return termcode_sequence<2, 'H'>{x, y};
+  }
+  // Deliberately not supported. Getting the current cursor position involves juggling between stdin
+  // and the terminal code output. Use ncurses if you need something this complex.
+  // static constexpr inline termcode<'n'> get_cursor{'6'};
   static constexpr inline single_termcode<'H'> home_cursor{};
-
-
 
   // TRUE COLORS
   namespace detail {
