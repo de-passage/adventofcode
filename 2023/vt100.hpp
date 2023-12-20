@@ -60,7 +60,7 @@ namespace dpsg::vt100 {
 
   template<class C, std::size_t S, char End>
     std::basic_ostream<C>& operator<<(std::basic_ostream<C>& os, const termcode_sequence<S, End>& s) {
-      os << "\\033";
+      os << "\033";
       if constexpr (S > 0) {
         os << "[" << static_cast<int>(s.codes[0]);
       }
@@ -156,7 +156,7 @@ namespace dpsg::vt100 {
   }
 
   inline constexpr auto set_cursor(std::size_t x, std::size_t y) noexcept {
-    return termcode_sequence<2, 'H'>{static_cast<uint8_t>(y), static_cast<uint8_t>(x)};
+    return termcode_sequence<2, 'H'>{static_cast<uint8_t>(x), static_cast<uint8_t>(y)};
   }
 
   static constexpr inline termcode<'n'> get_cursor{'6'};
