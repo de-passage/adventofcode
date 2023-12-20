@@ -10,6 +10,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <vector>
 
@@ -113,6 +114,15 @@ template<class T, class U>
 std::ostream& log_(std::ostream& os, const std::pair<T,U>&  opt) {
   os << "<"; log_(os, opt.first); os << ", "; log_(os, opt.second);
   return os << ">";
+}
+
+template<class ...Args>
+std::ostream& log_(std::ostream& os, const std::tuple<Args...>& t) {
+  os << "{";
+  std::apply([&os](auto&&... args) {
+    ((log_(os, args), os << ", "), ...);
+  }, t);
+  return os << "}";
 }
 
 namespace vt100 {
