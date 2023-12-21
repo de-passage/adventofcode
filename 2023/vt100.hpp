@@ -92,6 +92,8 @@ namespace dpsg::vt100 {
   };
 
   using color_termcode = termcode<'m'>;
+  template<size_t S>
+    using color_termcode_sequence = termcode_sequence<S, 'm'>;
 
 
   static constexpr color_termcode reset{0};
@@ -189,12 +191,33 @@ namespace dpsg::vt100 {
       T value;
     };
   template<size_t S, typename T>
-    generic_decorate(termcode_sequence<S>, T) -> generic_decorate<S, T>;
+    generic_decorate(color_termcode_sequence<S>, T) -> generic_decorate<S, T>;
 
   template<size_t S>
-    struct decorate : generic_decorate<S, std::string_view> {};
+    struct decorate_sw : generic_decorate<S, std::string_view> {};
   template<size_t S>
-    decorate(termcode_sequence<S>, std::string_view) -> decorate<S>;
+    decorate_sw(color_termcode_sequence<S>, std::string_view) -> decorate_sw<S>;
+  template<size_t S>
+    decorate_sw(color_termcode_sequence<S>, const char*) -> decorate_sw<S>;
+  template<size_t S>
+    decorate_sw(color_termcode_sequence<S>, const std::string&) -> decorate_sw<S>;
+
+  template<size_t S>
+  inline constexpr auto decorate(color_termcode_sequence<S> ct, const std::string &s) {
+    return decorate_sw{ct, s};
+  }
+  template<size_t S>
+  inline constexpr auto decorate(color_termcode_sequence<S> ct, std::string_view s) {
+    return decorate_sw{ct, s};
+  }
+  template<size_t S>
+  inline constexpr auto decorate(color_termcode_sequence<S> ct, const char *s) {
+    return decorate_sw{ct, s};
+  }
+  template<size_t S>
+  inline constexpr auto decorate(color_termcode_sequence<S> ct, char c) {
+    return generic_decorate<S, char>{ct, c};
+  }
 
   template<size_t S, typename T>
     std::ostream& operator<<(std::ostream& os, const generic_decorate<S, T>& d) {
