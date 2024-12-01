@@ -18,11 +18,11 @@
 
 namespace dpsg {
 
-template<class T, class U>
+template <class T, class U>
 concept same_as = std::is_same_v<T, U> && std::is_same_v<U, T>;
 
 template <class It>
-  concept input_iterator = requires(It it) {
+concept input_iterator = requires(It it) {
   { *it } -> same_as<typename std::iterator_traits<It>::reference>;
   { ++it } -> same_as<It &>;
   { it++ } -> same_as<It>;
@@ -57,17 +57,17 @@ enum class log_level { none, fatal, error, warning, info, debug, all };
 log_level get_log_level();
 void set_log_level(int level);
 bool is_log_level(log_level level);
-template<class T, class U>
-std::ostream& log_(std::ostream& os, const std::pair<T,U>&  opt);
+template <class T, class U>
+std::ostream &log_(std::ostream &os, const std::pair<T, U> &opt);
 
 template <class T> std::ostream &log_(std::ostream &os, const T &r) {
   return os << r;
 }
 
-inline std::ostream& log_(std::ostream& os, const std::string_view&  str) {
+inline std::ostream &log_(std::ostream &os, const std::string_view &str) {
   return os << str;
 }
-inline std::ostream& log_(std::ostream& os, const std::string&  str) {
+inline std::ostream &log_(std::ostream &os, const std::string &str) {
   return os << str;
 }
 
@@ -98,35 +98,36 @@ std::ostream &log_(std::ostream &os, const std::vector<T, Args...> &v) {
   return os << " ]";
 }
 
-template<class T, class Traits>
-std::ostream& log_(std::ostream& os, const std::basic_string_view<T, Traits>&  opt) {
+template <class T, class Traits>
+std::ostream &log_(std::ostream &os,
+                   const std::basic_string_view<T, Traits> &opt) {
   return os << opt;
 }
 
-std::ostream& log_(std::ostream& os, const Iterable auto&  opt) {
+std::ostream &log_(std::ostream &os, const Iterable auto &opt) {
   os << "{";
-  for (auto&& e : opt) {
+  for (auto &&e : opt) {
     log_(os, e);
     os << ", ";
   }
   return os << "}";
 }
 
-template<class T, class U>
-std::ostream& log_(std::ostream& os, const std::pair<T,U>&  opt) {
-  os << "<"; log_(os, opt.first); os << ", "; log_(os, opt.second);
+template <class T, class U>
+std::ostream &log_(std::ostream &os, const std::pair<T, U> &opt) {
+  os << "<";
+  log_(os, opt.first);
+  os << ", ";
+  log_(os, opt.second);
   return os << ">";
 }
 
-template<class ...Args>
-std::ostream& log_(std::ostream& os, const std::tuple<Args...>& t) {
+template <class... Args>
+std::ostream &log_(std::ostream &os, const std::tuple<Args...> &t) {
   os << "{";
-  std::apply([&os](auto&&... args) {
-    ((log_(os, args), os << ", "), ...);
-  }, t);
+  std::apply([&os](auto &&...args) { ((log_(os, args), os << ", "), ...); }, t);
   return os << "}";
 }
-
 
 template <class... Args> void log(Args &&...args) {
   if (is_log_level(log_level::debug))
@@ -141,7 +142,7 @@ template <class... Args> void logln(Args &&...args) {
   std::clog << std::endl;
 }
 
-std::fstream get_input(std::string filename, int argc, const char **arg);
+std::fstream get_input(std::string_view filename, int argc, const char **arg);
 
 template <template <class T, class... R> class C, class T, class U,
           std::enable_if_t<std::is_convertible_v<std::decay_t<U>, T>, int> = 0,
@@ -203,6 +204,7 @@ auto unstable_erase(C<T, R...> &vec, T value) {
 } // namespace dpsg
 
 #ifdef COMPILE_UTILS
+//NOLINTBEGIN(misc-definitions-in-headers)
 namespace dpsg {
 
 const auto NUMBERS = "0123456789";
@@ -217,130 +219,132 @@ log_level get_log_level() { return LOG_LEVEL; }
 void set_log_level(log_level level) { LOG_LEVEL = level; }
 bool is_log_level(log_level level) { return LOG_LEVEL < level; }
 
-std::fstream get_input(std::string filename, int argc, const char **argv) {
+inline std::fstream get_input(std::string_view filename, int argc, const char **argv) {
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-d") == 0)
-    set_log_level(log_level::debug);
-  else
-    filename = argv[i];
-}
+      set_log_level(log_level::debug);
+    else
+      filename = argv[i];
+  }
 
-std::fstream file(filename, std::ios::in);
-if (!file.is_open()) {
-  std::cerr << "Could not open file " << filename << std::endl;
-  std::exit(1);
-}
-return file;
+  std::fstream file(filename.data(), std::ios::in);
+  if (!file.is_open()) {
+    std::cerr << "Could not open file " << filename << std::endl;
+    std::exit(1);
+  }
+  return file;
 }
 
 size_t atoi(std::string_view str, size_t pos, size_t end) {
-size_t result = 0;
-for (size_t i = pos; i < end; ++i) {
-  result *= 10;
-  result += str[i] - '0';
-}
-return result;
+  size_t result = 0;
+  for (size_t i = pos; i < end; ++i) {
+    result *= 10;
+    result += str[i] - '0';
+  }
+  return result;
 }
 
 range find_range(std::string_view str, const char *pattern, size_t pos) {
-auto begin = str.find_first_of(pattern, pos);
-auto end = std::string_view::npos;
-if (begin != std::string_view::npos) {
-  end = str.find_first_not_of(pattern, begin);
-  if (end == std::string_view::npos) {
-    end = str.size();
+  auto begin = str.find_first_of(pattern, pos);
+  auto end = std::string_view::npos;
+  if (begin != std::string_view::npos) {
+    end = str.find_first_not_of(pattern, begin);
+    if (end == std::string_view::npos) {
+      end = str.size();
+    }
   }
-}
-return {begin, end};
+  return {begin, end};
 }
 
 bool isValid(range r) { return r.begin != std::string_view::npos; }
 
 std::optional<ranged<size_t>> next_number(std::string_view str, size_t pos) {
-auto r = find_range(str, NUMBERS, pos);
-if (isValid(r)) {
-  return {{atoi(str, r.begin, r.end), r}};
-}
-return {};
+  auto r = find_range(str, NUMBERS, pos);
+  if (isValid(r)) {
+    return {{atoi(str, r.begin, r.end), r}};
+  }
+  return {};
 }
 
 std::optional<ranged<std::string_view>> next_word(std::string_view str,
-                                                size_t pos) {
-auto r = find_range(str, LETTERS, pos);
-if (isValid(r)) {
-  return {{str.substr(r.begin, r.end - r.begin), r}};
-}
-return {};
+                                                  size_t pos) {
+  auto r = find_range(str, LETTERS, pos);
+  if (isValid(r)) {
+    return {{str.substr(r.begin, r.end - r.begin), r}};
+  }
+  return {};
 }
 
 std::optional<ranged<std::string_view>> next_symbol(std::string_view str,
-                                                  size_t pos) {
-auto r = str.find_first_of(SYMBOL_FIRST_CHAR, pos);
-if (r != std::string_view::npos) {
-  auto end = str.find_first_not_of(SYMBOL_NEXT_CHAR, r);
-  if (end == std::string_view::npos) {
-    end = str.size();
+                                                    size_t pos) {
+  auto r = str.find_first_of(SYMBOL_FIRST_CHAR, pos);
+  if (r != std::string_view::npos) {
+    auto end = str.find_first_not_of(SYMBOL_NEXT_CHAR, r);
+    if (end == std::string_view::npos) {
+      end = str.size();
+    }
+    return {{str.substr(r, end - r), {r, end}}};
   }
-  return {{str.substr(r, end - r), {r, end}}};
-}
-return {};
+  return {};
 }
 
 std::optional<ranged<std::string_view>>
 next_alnum_sequence(std::string_view str, size_t pos) {
-auto r = std::find_if(str.begin() + pos, str.end(),
-                      [](char c) { return std::isalnum(c); });
-if (r != str.end()) {
-  auto pos = std::distance(str.begin(), r);
-  auto end = std::find_if_not(str.begin() + pos, str.end(),
-                              [](char c) { return std::isalnum(c); });
-  auto d = std::distance(r, end);
-  return {{str.substr(pos, d), {size_t(pos), size_t(pos + d)}}};
-}
-return {};
+  auto r = std::find_if(str.begin() + pos, str.end(),
+                        [](char c) { return std::isalnum(c); });
+  if (r != str.end()) {
+    auto pos = std::distance(str.begin(), r);
+    auto end = std::find_if_not(str.begin() + pos, str.end(),
+                                [](char c) { return std::isalnum(c); });
+    auto d = std::distance(r, end);
+    return {{str.substr(pos, d), {size_t(pos), size_t(pos + d)}}};
+  }
+  return {};
 }
 
 template <class T>
 std::ostream &operator<<(std::ostream &os, const ranged<T> &r) {
-return os << "{ " << r.value << " at " << r.position << " }";
+  return os << "{ " << r.value << " at " << r.position << " }";
 }
+} // namespace dpsg
+  //
+//NOLINTEND(misc-definitions-in-headers)
 #endif
 
+namespace dpsg {
 inline size_t combine_ints(size_t left, size_t right) {
-size_t t = right;
-while (t > 0) {
-  left *= 10;
-  t /= 10;
-}
-return left + right;
+  size_t t = right;
+  while (t > 0) {
+    left *= 10;
+    t /= 10;
+  }
+  return left + right;
 }
 
 namespace detail {
-  inline std::string prepare_file_name(std::string_view file) {
-    auto pos = file.find_last_of('/');
-    if (pos != std::string_view::npos) {
-      file.remove_prefix(pos + 1);
-    }
-    if (file.substr(0,3) != "day") {
-      return std::string{file} + ".txt";
-    }
-    pos = file.find_first_not_of("0123456789", 3);
-    return std::string{file.substr(0, pos)} + ".txt";
+inline std::string prepare_file_name(std::string_view file) {
+  auto pos = file.find_last_of('/');
+  if (pos != std::string_view::npos) {
+    file.remove_prefix(pos + 1);
   }
+  if (file.substr(0, 3) != "day") {
+    return std::string{file} + ".txt";
+  }
+  pos = file.find_first_not_of("0123456789", 3);
+  return std::string{file.substr(0, pos)} + ".txt";
 }
-}
+} // namespace detail
+} // namespace dpsg
 
-
-
-#define DPSG_AOC_MAIN(filevar)  \
-  namespace dpsg::detail { \
-    void aoc_main(auto&& filevar);  \
-  } \
-  int main(int argc, const char** argv) { \
-    auto filevar = dpsg::get_input(dpsg::detail::prepare_file_name(__BASE_FILE__), argc, argv); \
-    dpsg::detail::aoc_main(filevar); \
-  } \
-  void dpsg::detail::aoc_main(auto&& filevar)
-
+#define DPSG_AOC_MAIN(filevar)                                                 \
+  namespace dpsg::detail {                                                     \
+  void aoc_main(std::fstream &filevar);                                        \
+  }                                                                            \
+  int main(int argc, const char **argv) {                                      \
+    auto filevar = dpsg::get_input(                                            \
+        dpsg::detail::prepare_file_name(__BASE_FILE__), argc, argv);           \
+    dpsg::detail::aoc_main(filevar);                                           \
+  }                                                                            \
+  void dpsg::detail::aoc_main(std::fstream &filevar)
 
 #endif // HEADER_GUARD_UTILS_HPP

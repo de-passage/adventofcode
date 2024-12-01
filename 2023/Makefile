@@ -1,5 +1,5 @@
 # Specify the compiler to use
-CC = clang++
+CXX ?= clang++
 
 # Specify the target executable
 TARGET = $(basename $(notdir $(wildcard *.cpp)))
@@ -11,7 +11,7 @@ SOURCES = $(wildcard *.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
 
 # Specify the include directories
-INCLUDES =
+INCLUDES = -I../common
 
 # Specify the library directories
 LIBRARIES =
@@ -22,7 +22,7 @@ LIBS =
 # Specify the compile flags
 CFLAGS =
 
-ACTUAL_CFLAGS = $(CFLAGS) $(shell cat compile_flags.txt)
+ACTUAL_CFLAGS = $(CFLAGS) $(shell cat compile_flags.txt) $(INCLUDES)
 
 # Specify the linker flags
 LDFLAGS =
@@ -33,11 +33,11 @@ run_test: test
 	@echo "Test passed successfully!"
 
 test: test.cpp
-	$(CC) $(ACTUAL_CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS) -g
+	$(CXX) $(ACTUAL_CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS) -g
 
 # Target for the executable
 %: %.cpp
-		$(CC) $(ACTUAL_CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS)
+		$(CXX) $(ACTUAL_CFLAGS) $(LDFLAGS) $< -o $@ $(LIBS)
 
 # Target for cleaning up
 clean:

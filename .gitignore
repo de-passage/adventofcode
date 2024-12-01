@@ -6,3 +6,5 @@ day*
 !*.hpp
 !*.txt
 test
+build/
+build-*/

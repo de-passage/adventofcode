@@ -115,7 +115,7 @@ inline constexpr bool operator==(const basic_range<T> &lhs,
 }
 } // namespace dpsg
 
-template <class T> struct ::std::hash<dpsg::basic_range<T>> {
+template <class T> struct std::hash<dpsg::basic_range<T>> {
   size_t operator()(const dpsg::basic_range<T> &r) const {
     return std::hash<T>()(r.begin) ^ (std::hash<T>()(r.end) << 1);
   }
