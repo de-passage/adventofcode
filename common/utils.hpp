@@ -180,6 +180,7 @@ auto unstable_erase(C<T, R...> &vec, It it)
                         std::is_same<It, typename C<T, R...>::iterator>>,
                     void>>()) {
   using std::iter_swap;
+  using std::end;
   auto last =
       end(vec) -
       1; // there must be at least one element since we have an iterator on one
@@ -201,10 +202,95 @@ auto unstable_erase(C<T, R...> &vec, T value) {
     vec.pop_back();
   }
 }
+
+namespace detail {
+struct eof_line_iter {};
+struct eol_iter {};
+template <class T, class U> struct line_iter {
+  std::basic_fstream<T, U> *file;
+  std::string current;
+
+  line_iter(std::basic_fstream<T, U> *file) : file(file) {
+    next_();
+  }
+
+  line_iter &operator++() { next_(); return *this; }
+
+  const std::string& operator*() const {
+    return current;
+  }
+
+  friend bool operator!=(const line_iter &lhs,
+                         [[maybe_unused]] const eof_line_iter &rhs) {
+    return !lhs.file->eof();
+  }
+
+  void next_() {
+    std::getline(*file, current);
+  }
+};
+
+template<class T> struct integers_iter {
+  std::string_view line;
+  size_t pos = 0;
+  T current = 0;
+
+  integers_iter(std::string_view line) : line(line) {
+    next_();
+  }
+
+  integers_iter& operator++() {
+    next_();
+    return *this;
+  }
+
+  T operator*() const {
+    return current;
+  }
+
+  void next_() {
+    auto r = next_number(line, pos);
+    if (r) {
+      pos = r->position.end;
+      current = r->value;
+    } else {
+      pos = std::string::npos;
+    }
+  }
+
+  friend bool operator!=(const integers_iter& lhs, [[maybe_unused]] const eol_iter& rhs) {
+    return lhs.pos != std::string::npos;
+  }
+};
+
+} // namespace detail
+
+template <class C, class T> struct lines {
+  std::basic_fstream<C, T> &file;
+
+  lines(std::basic_fstream<C, T> &file) : file(file) {}
+
+  auto begin() { return detail::line_iter<C, T>{&file}; }
+
+  auto end() { return detail::eof_line_iter{}; }
+};
+template <class C, class T, template<class,class>class S> lines(S<C, T> &)
+    -> lines<C, T>;
+
+struct numbers {
+  std::string_view line;
+
+  numbers(std::string_view line) : line(line) {}
+
+  auto begin() { return detail::integers_iter<size_t>{line}; }
+
+  auto end() { return detail::eol_iter{}; }
+};
+
 } // namespace dpsg
 
 #ifdef COMPILE_UTILS
-//NOLINTBEGIN(misc-definitions-in-headers)
+// NOLINTBEGIN(misc-definitions-in-headers)
 namespace dpsg {
 
 const auto NUMBERS = "0123456789";
@@ -219,7 +305,8 @@ log_level get_log_level() { return LOG_LEVEL; }
 void set_log_level(log_level level) { LOG_LEVEL = level; }
 bool is_log_level(log_level level) { return LOG_LEVEL < level; }
 
-inline std::fstream get_input(std::string_view filename, int argc, const char **argv) {
+inline std::fstream get_input(std::string_view filename, int argc,
+                              const char **argv) {
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-d") == 0)
       set_log_level(log_level::debug);
@@ -307,11 +394,14 @@ std::ostream &operator<<(std::ostream &os, const ranged<T> &r) {
   return os << "{ " << r.value << " at " << r.position << " }";
 }
 } // namespace dpsg
-  //
-//NOLINTEND(misc-definitions-in-headers)
+
+// NOLINTEND(misc-definitions-in-headers)
 #endif
 
 namespace dpsg {
+
+// Builds a new integer by pushing the digits of the left integer to the left of
+// the digits of the right integer. e.g. combine_ints(123, 456) == 123456
 inline size_t combine_ints(size_t left, size_t right) {
   size_t t = right;
   while (t > 0) {
