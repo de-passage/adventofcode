@@ -1,41 +1,55 @@
 #include "utils.hpp"
 #include <cassert>
 #include <print>
+#include <ranges>
+
+bool is_valid(const std::vector<int> &numbers) {
+  assert(numbers.size() >= 2);
+  auto first = numbers[0];
+  auto second = numbers[1];
+
+  int dist = std::abs(second - first);
+
+  if (dist == 0 || dist > 3) {
+    return false;
+  }
+  bool descending = second < first;
+
+  size_t last = second;
+
+  for (auto i : numbers | std::ranges::views::drop(2)) {
+    int dist = std::abs((int)i - (int)last);
+    if (dist == 0 || dist > 3) {
+      return false;
+    }
+    if (i < last != descending) {
+      return false;
+    }
+    last = i;
+  }
+  return true;
+}
 
 DPSG_AOC_MAIN(file) {
   int sum = 0;
 
   for (auto line : dpsg::lines(file)) {
-    auto first = dpsg::next_number(line);
-    if (!first.has_value()) {
-      continue;
+    std::vector<int> numbers;
+    for (auto i : dpsg::numbers(line)) {
+      numbers.push_back(i);
     }
-    auto second = dpsg::next_number(line, first->position.end);
-    assert(second.has_value() && "Expected a number");
-
-    int dist = std::abs((int)second->value - (int)first->value);
-
-    if (dist == 0 || dist > 3) {
-      continue;
-    }
-    bool descending = second->value < first->value;
-
-    auto remaining = std::string_view{line}.substr(second->position.end);
-    size_t last = second->value;
-
-    for (auto i: dpsg::numbers(remaining)) {
-      int dist = std::abs((int)i - (int)last);
-      if (dist == 0 || dist > 3) {
-        goto next_line;
+    if (is_valid(numbers)) {
+      sum += 1;
+    } else {
+      for (size_t i = 0; i < numbers.size(); ++i) {
+        std::vector copy = numbers;
+        copy.erase(copy.begin() + i);
+        if (is_valid(copy)) {
+          sum += 1;
+          break;
+        }
       }
-      if (i < last != descending) {
-        goto next_line;
-      }
-      last = i;
     }
-    sum += 1;
-
-next_line:;
   }
   std::println("{}", sum);
 }
