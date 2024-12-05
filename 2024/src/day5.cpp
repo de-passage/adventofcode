@@ -4,12 +4,8 @@
 #include <print>
 #include <unordered_map>
 
-struct ordering {
-  int left, right;
-};
 
 DPSG_AOC_MAIN(file) {
-  std::vector<ordering> order;
   std::unordered_multimap<int, int> ordermap;
   auto lines = dpsg::lines(file);
   for (auto line : lines) {
@@ -18,7 +14,6 @@ DPSG_AOC_MAIN(file) {
     }
     auto left = next_number(line).value();
     auto right = next_number(line, left.position.end).value();
-    order.emplace_back(left.value, right.value);
     ordermap.insert({left.value, right.value});
   }
 
