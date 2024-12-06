@@ -16,7 +16,7 @@ struct coord_t {
 
 template <> struct std::hash<coord_t> {
   std::size_t operator()(const coord_t &c) const {
-    return std::hash<int>{}(c.x) ^ std::hash<int>{}(c.y);
+    return std::hash<int>{}(c.x) * 130 + std::hash<int>{}(c.y);
   }
 };
 
@@ -125,9 +125,6 @@ DPSG_AOC_MAIN(file) {
   int n = 0;
   int m = visited.size();
   for (auto p : visited) {
-    if (n++ % 100 == 0) {
-      std::println("Progress: {}/{} (count so far: {})", n, m, count);
-    }
     if (guard == p) {
       continue;
     }
