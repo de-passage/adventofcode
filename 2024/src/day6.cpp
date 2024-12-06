@@ -75,21 +75,6 @@ DPSG_AOC_MAIN(file) {
   std::unordered_set<coord_t> visited;
   while (true) {
     visited.emplace(guard);
-    /* std::println("Guard at: ({}, {})", guard.x, guard.y);
-    std::println("Dir: ({}, {})", dir.x, dir.y);
-
-    for (int x = 0; x < map.size(); ++x) {
-      for(int y = 0; y < map[x].size(); ++y) {
-        if (guard.x == y && guard.y == x) {
-          std::print("G");
-        } else if (visited.contains({y, x})) {
-          std::print("o");
-        } else {
-          std::print("{}", map[x][y] ? '.' : '#');
-        }
-      }
-      std::println();
-    } */
 
     auto next = guard + dir;
     if (!valid(next, map)) {

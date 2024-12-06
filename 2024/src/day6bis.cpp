@@ -1,5 +1,6 @@
 #include "utils.hpp"
 #include <cassert>
+#include <chrono>
 #include <print>
 #include <unordered_set>
 
@@ -13,16 +14,14 @@ struct coord_t {
   }
 };
 
-template<>
-struct std::hash<coord_t> {
+template <> struct std::hash<coord_t> {
   std::size_t operator()(const coord_t &c) const {
     return std::hash<int>{}(c.x) ^ std::hash<int>{}(c.y);
   }
 };
 
-template<>
-struct std::hash<std::pair<coord_t,coord_t>> {
-  std::size_t operator()(const std::pair<coord_t,coord_t> &c) const {
+template <> struct std::hash<std::pair<coord_t, coord_t>> {
+  std::size_t operator()(const std::pair<coord_t, coord_t> &c) const {
     return std::hash<coord_t>{}(c.first) ^ std::hash<coord_t>{}(c.second);
   }
 };
@@ -51,15 +50,11 @@ bool at(coord_t c, const map_t &map) { return map[c.y][c.x]; }
 
 using loop_t = std::unordered_set<std::pair<coord_t, coord_t>>;
 
-bool is_loop(const map_t &map, coord_t guard, loop_t& known_loops) {
-  std::unordered_set<coord_t> visited;
+bool is_loop(const map_t &map, coord_t guard) {
   loop_t loops;
   coord_t dir = {0, -1};
   while (true) {
-    visited.emplace(guard);
-
     if (loops.contains({guard, dir})) {
-      known_loops.merge(loops);
       return true;
     }
 
@@ -73,6 +68,26 @@ bool is_loop(const map_t &map, coord_t guard, loop_t& known_loops) {
       continue;
     } else {
       loops.emplace(guard, dir);
+    }
+
+    guard = next;
+  }
+}
+
+std::unordered_set<coord_t> traverse(const map_t &map, coord_t guard) {
+  std::unordered_set<coord_t> visited;
+  coord_t dir = {0, -1};
+  while (true) {
+    visited.emplace(guard);
+
+    auto next = guard + dir;
+    if (!valid(next, map)) {
+      return visited;
+    }
+
+    if (at(next, map) == false) {
+      dir = rotate_right(dir);
+      continue;
     }
 
     guard = next;
@@ -103,25 +118,28 @@ DPSG_AOC_MAIN(file) {
   coord_t dir = {0, -1};
   int count = 0;
 
-  loop_t known_loops;
+  std::chrono::steady_clock::time_point start =
+      std::chrono::steady_clock::now();
+
+  auto visited = traverse(map, guard);
   int n = 0;
-  int m = 130*130;
-  for (int i = 0; i < map.size(); ++i) {
-    for (int j = 0; j < map[i].size(); ++j) {
-      if (n++ % 10 == 0) {
-        std::println("Progress: {}/{}", n, m);
-      }
-      if (map[i][j] == false || guard == coord_t{j, i}) {
-        continue;
-      }
-
-      map[i][j] = false;
-      if (is_loop(map, guard, known_loops)) {
-        count++;
-      }
-      map[i][j] = true;
+  int m = visited.size();
+  for (auto p : visited) {
+    if (n++ % 100 == 0) {
+      std::println("Progress: {}/{} (count so far: {})", n, m, count);
     }
-  }
-  std::println("Count: {}", count);
-}
+    if (guard == p) {
+      continue;
+    }
 
+    map[p.y][p.x] = false;
+    if (is_loop(map, guard)) {
+      count++;
+    }
+    map[p.y][p.x] = true;
+  }
+  std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+  std::println(
+      "Count: {}\nTook {}", count,
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start));
+}
