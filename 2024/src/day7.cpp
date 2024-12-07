@@ -1,0 +1,71 @@
+#include "utils.hpp"
+#include <cassert>
+#include <print>
+#include <queue>
+
+struct operation {
+  long value;
+  size_t idx_nb;
+};
+
+bool try_possibilities (long target, std::vector<size_t>& numbers) {
+  assert(numbers.size() > 0);
+  operation current = {target, numbers.size() - 1};
+
+  std::queue<operation> operations;
+  operations.push(current);
+  int sum = 0;
+
+  while (!operations.empty()) {
+    current = operations.front();
+    operations.pop();
+
+    long t = current.value;
+    long n  = numbers[current.idx_nb];
+
+    if (current.idx_nb == 0) {
+      if (t == n) {
+        return true;
+      }
+    } else {
+      operations.push({t - n, current.idx_nb - 1});
+      if (n != 0 && t % n == 0) {
+        operations.push({t / n, current.idx_nb - 1});
+      }
+    }
+  }
+  return false;
+}
+
+DPSG_AOC_MAIN(file) {
+  size_t sum = 0;
+
+  for (auto line : dpsg::lines(file)) {
+    auto targetopt = next_number(line);
+    assert(targetopt.has_value());
+    auto [target, range] = targetopt.value();
+    auto [_, end] = range;
+
+    std::vector<size_t> numbers;
+    for (auto n : dpsg::numbers(line, end)) {
+      numbers.push_back(n);
+    }
+
+    dpsg::logln("Target: ", target);
+    dpsg::log("Numbers: ");
+    for (auto n : numbers) {
+      dpsg::log(n, ", ");
+    }
+    dpsg::logln();
+    bool r = try_possibilities(target, numbers);
+    dpsg::logln("Result: ", r);
+
+    auto last = sum;
+    if (r) { sum += target;}
+    if (sum < last) {
+      std::println("Overflow: ", sum, " < ", last);
+      break;
+    }
+  }
+  std::println("Sum: {}", sum);
+}

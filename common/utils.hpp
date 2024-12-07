@@ -235,7 +235,7 @@ template<class T> struct integers_iter {
   size_t pos = 0;
   T current = 0;
 
-  integers_iter(std::string_view line) : line(line) {
+  integers_iter(std::string_view line, size_t start) : line(line), pos{start} {
     next_();
   }
 
@@ -279,10 +279,11 @@ template <class C, class T, template<class,class>class S> lines(S<C, T> &)
 
 struct numbers {
   std::string_view line;
+  size_t start;
 
-  numbers(std::string_view line) : line(line) {}
+  numbers(std::string_view line, size_t start = 0) : line(line), start{start} {}
 
-  auto begin() { return detail::integers_iter<size_t>{line}; }
+  auto begin() { return detail::integers_iter<size_t>{line, start}; }
 
   auto end() { return detail::eol_iter{}; }
 };
