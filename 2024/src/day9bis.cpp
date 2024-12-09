@@ -51,10 +51,9 @@ DPSG_AOC_MAIN(file) {
   size_t checksum = 0;
 
 
-  // we start by computing the empty spaces, we need to calculate the checksum
-  // starting from the beginning of the empty spaces, and "filling" it with the
-  // files taken from the end of the queue. We stop when the index of the
-  // current empty space is greater than the index of the last file.
+  // In this version we can simply "move" the files in the first empty space 
+  // that we find that is big enough. Moving is simply changing the beginning 
+  // index.
   for (int i = files.size() - 1; i >= 0; --i) {
     auto &current_file = files[i];
 
