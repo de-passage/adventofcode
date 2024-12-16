@@ -51,8 +51,8 @@ DPSG_AOC_MAIN(file) {
   size_t checksum = 0;
 
 
-  // In this version we can simply "move" the files in the first empty space 
-  // that we find that is big enough. Moving is simply changing the beginning 
+  // In this version we can simply "move" the files in the first empty space
+  // that we find that is big enough. Moving is simply changing the beginning
   // index.
   for (int i = files.size() - 1; i >= 0; --i) {
     auto &current_file = files[i];
@@ -60,7 +60,6 @@ DPSG_AOC_MAIN(file) {
     for (auto& e : empty_spaces) {
       if (e.start > current_file.start) { break; }
       if (e.size >= current_file.size) {
-                     current_file.start, e.start);
         current_file.start = e.start;
         e.size -= current_file.size;
         e.start += current_file.size;

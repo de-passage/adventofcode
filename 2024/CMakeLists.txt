@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.29)
 
-set(CURRENT_DAY 14)
+set(CURRENT_DAY 16)
 
 project(advent_of_code_2024)
 
