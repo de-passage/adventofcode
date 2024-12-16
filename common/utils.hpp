@@ -46,6 +46,8 @@ range find_range(std::string_view str, const char *pattern, size_t pos);
 std::optional<ranged<std::string_view>> next_word(std::string_view str,
                                                   size_t pos = 0);
 std::optional<ranged<size_t>> next_number(std::string_view str, size_t pos = 0);
+std::optional<ranged<int64_t>> next_number_with_sign(std::string_view str,
+                                                     size_t pos = 0);
 std::optional<ranged<std::string_view>>
 next_alnum_sequence(std::string_view str, size_t pos = 0);
 std::optional<ranged<std::string_view>> next_symbol(std::string_view str,
@@ -179,8 +181,8 @@ auto unstable_erase(C<T, R...> &vec, It it)
                         std::is_same<It, typename C<T, R...>::const_iterator>,
                         std::is_same<It, typename C<T, R...>::iterator>>,
                     void>>()) {
-  using std::iter_swap;
   using std::end;
+  using std::iter_swap;
   auto last =
       end(vec) -
       1; // there must be at least one element since we have an iterator on one
@@ -210,27 +212,24 @@ template <class T, class U> struct line_iter {
   std::basic_fstream<T, U> *file;
   std::string current;
 
-  line_iter(std::basic_fstream<T, U> *file) : file(file) {
+  line_iter(std::basic_fstream<T, U> *file) : file(file) { next_(); }
+
+  line_iter &operator++() {
     next_();
+    return *this;
   }
 
-  line_iter &operator++() { next_(); return *this; }
-
-  const std::string& operator*() const {
-    return current;
-  }
+  const std::string &operator*() const { return current; }
 
   friend bool operator!=(const line_iter &lhs,
                          [[maybe_unused]] const eof_line_iter &rhs) {
     return !lhs.file->eof();
   }
 
-  void next_() {
-    std::getline(*file, current);
-  }
+  void next_() { std::getline(*file, current); }
 };
 
-template<class T> struct integers_iter {
+template <class T> struct integers_iter {
   std::string_view line;
   size_t pos = 0;
   T current = 0;
@@ -239,14 +238,12 @@ template<class T> struct integers_iter {
     next_();
   }
 
-  integers_iter& operator++() {
+  integers_iter &operator++() {
     next_();
     return *this;
   }
 
-  T operator*() const {
-    return current;
-  }
+  T operator*() const { return current; }
 
   void next_() {
     auto r = next_number(line, pos);
@@ -258,7 +255,8 @@ template<class T> struct integers_iter {
     }
   }
 
-  friend bool operator!=(const integers_iter& lhs, [[maybe_unused]] const eol_iter& rhs) {
+  friend bool operator!=(const integers_iter &lhs,
+                         [[maybe_unused]] const eol_iter &rhs) {
     return lhs.pos != std::string::npos;
   }
 };
@@ -274,8 +272,8 @@ template <class C, class T> struct lines {
 
   auto end() { return detail::eof_line_iter{}; }
 };
-template <class C, class T, template<class,class>class S> lines(S<C, T> &)
-    -> lines<C, T>;
+template <class C, class T, template <class, class> class S>
+lines(S<C, T> &) -> lines<C, T>;
 
 struct numbers {
   std::string_view line;
@@ -295,6 +293,7 @@ struct numbers {
 namespace dpsg {
 
 const auto NUMBERS = "0123456789";
+const auto NUMBERS_WITH_SIGN = "0123456789-";
 const auto LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const auto SYMBOL_FIRST_CHAR =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_";
@@ -352,6 +351,30 @@ std::optional<ranged<size_t>> next_number(std::string_view str, size_t pos) {
     return {{atoi(str, r.begin, r.end), r}};
   }
   return {};
+}
+
+std::optional<ranged<int64_t>> next_number_with_sign(std::string_view str,
+                                                     size_t pos) {
+  auto start = str.find_first_of(NUMBERS_WITH_SIGN, pos);
+  if (start == std::string_view::npos) {
+    return {};
+  }
+  auto end = str.find_first_not_of(NUMBERS, start + 1);
+  if (end == std::string_view::npos) {
+    end = str.size();
+  }
+
+  if (str[start] == '-') {
+    if (end - start == 1) {
+      return {};
+    }
+
+    return {{-std::stoll(std::string{str.substr(start + 1, end - start - 1)}),
+             {start, end}}};
+  } else {
+    return {{std::stoll(std::string{str.substr(start, end - start)}),
+             {start, end}}};
+  }
 }
 
 std::optional<ranged<std::string_view>> next_word(std::string_view str,
