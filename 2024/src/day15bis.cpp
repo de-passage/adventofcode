@@ -1,5 +1,7 @@
 #include "utils.hpp"
 #include <cassert>
+#include <unordered_map>
+#include <unordered_set>
 
 struct vec2 {
   int x, y;
@@ -20,6 +22,12 @@ struct vec2 {
   }
 };
 
+template <> struct std::hash<vec2> {
+  std::size_t operator()(const vec2 &v) const noexcept {
+    return std::hash<int>{}(v.x) * 1000 + std::hash<int>{}(v.y);
+  }
+};
+
 enum class cell : uint8_t {
   EMPTY = 0,
   WALL = 1,
@@ -32,6 +40,32 @@ bool is_block(cell c) {
 }
 
 using map_t = std::vector<std::vector<cell>>;
+
+bool push(const vec2 &pos, const vec2 &dir,
+          std::unordered_map<vec2, cell> &to_move, const map_t &map) {
+
+  if (map[pos.y][pos.x] == cell::WALL) {
+    return false;
+  }
+
+  if (map[pos.y][pos.x] == cell::BLOCK_LEFT) {
+    auto new_pos_right = pos + vec2{1, 0};
+    to_move.emplace(pos, cell::BLOCK_LEFT);
+    to_move.emplace(new_pos_right, cell::BLOCK_RIGHT);
+
+    return push(pos + dir, dir, to_move, map) &&
+           push(new_pos_right + dir, dir, to_move, map);
+  } else if (map[pos.y][pos.x] == cell::BLOCK_RIGHT) {
+    auto new_pos_left = pos - vec2{1, 0};
+    to_move.emplace(pos, cell::BLOCK_RIGHT);
+    to_move.emplace(new_pos_left, cell::BLOCK_LEFT);
+
+    return push(pos + dir, dir, to_move, map) &&
+           push(new_pos_left + dir, dir, to_move, map);
+  } else {
+    return true;
+  }
+}
 
 void move(vec2 &pos, const vec2 &dir, map_t &map) {
   auto new_pos = pos + dir;
@@ -60,7 +94,7 @@ void move(vec2 &pos, const vec2 &dir, map_t &map) {
         return;
       }
 
-      cell to_insert = cell::BLOCK_LEFT;
+      cell to_insert = (cell)((uint8_t)map[new_pos.y][new_pos.x] ^ 6);
 
       while (empty_pos != new_pos) {
         map[empty_pos.y][empty_pos.x] = to_insert;
@@ -71,6 +105,18 @@ void move(vec2 &pos, const vec2 &dir, map_t &map) {
 
       map[new_pos.y][new_pos.x] = cell::EMPTY;
     } else if (dir.y != 0) {
+      std::unordered_map<vec2, cell> blocks_to_move;
+
+      if (!push(new_pos, dir, blocks_to_move, map)) {
+        return;
+      }
+
+      for (auto [block, _] : blocks_to_move) {
+        map[block.y][block.x] = cell::EMPTY;
+      }
+      for (auto [block, c] : blocks_to_move) {
+        map[block.y + dir.y][block.x + dir.x] = c;
+      }
     }
   }
 
@@ -94,12 +140,16 @@ DPSG_AOC_MAIN(file) {
     for (auto ch : line) {
       if (ch == '#') {
         map[y][x] = cell::WALL;
+        map[y][x + 1] = cell::WALL;
       } else if (ch == '.') {
         map[y][x] = cell::EMPTY;
+        map[y][x + 1] = cell::EMPTY;
       } else if (ch == 'O') {
         map[y][x] = cell::BLOCK_LEFT;
+        map[y][x + 1] = cell::BLOCK_RIGHT;
       } else if (ch == '@') {
         map[y][x] = cell::EMPTY;
+        map[y][x + 1] = cell::EMPTY;
         pos = {x, y};
       }
       x += 2;
@@ -134,7 +184,7 @@ DPSG_AOC_MAIN(file) {
   }
 
   for (auto dir : path) {
-    int y = 0;
+    /* int y = 0;
     for (auto &row : map) {
       int x = 0;
       for (auto cell : row) {
@@ -164,9 +214,40 @@ DPSG_AOC_MAIN(file) {
       std::printf("\n");
     }
     std::printf("Current position: %d, %d\n", pos.x, pos.y);
-    std::getchar();
+    std::getchar(); */
     move(pos, dir, map);
   }
+  /* for (auto dir : path) {
+    int y = 0;
+    for (auto &row : map) {
+      int x = 0;
+      for (auto cell : row) {
+        switch (cell) {
+        case cell::EMPTY:
+          if (pos == vec2{x, y}) {
+            std::printf("@");
+          } else {
+            std::printf(".");
+          }
+          break;
+
+        case cell::WALL:
+          std::printf("#");
+          break;
+
+        case cell::BLOCK_LEFT:
+          std::printf("[");
+          break;
+        case cell::BLOCK_RIGHT:
+          std::printf("]");
+          break;
+        }
+        x++;
+      }
+      y++;
+      std::printf("\n");
+    }
+  } */
 
   long long result = 0;
   for (int y = 0; y < map.size(); ++y) {
