@@ -8,3 +8,6 @@ day*
 test
 build/
 build-*/
+*/input/*
+!*/input/*example*
+!*/input/*test*
