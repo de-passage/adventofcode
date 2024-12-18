@@ -15,7 +15,7 @@ if [[ ! -f "${CONFIG_FILE}" ]]; then
   err "Please create a config file '${CONFIG_FILE}' with the AOC session cookie"
 fi
 
-if [[ $# -ne 2 ]]; then
+if [[ $# -le 2 ]]; then
   err "Usage: $0 <year> <day> [<output_file>]"
 fi
 
