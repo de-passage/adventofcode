@@ -261,6 +261,38 @@ template <class T> struct integers_iter {
   }
 };
 
+struct words_iter {
+  std::string_view line;
+  size_t pos = 0;
+  std::string_view current;
+
+  words_iter(std::string_view line, size_t start) : line(line), pos{start} {
+    next_();
+  }
+
+  words_iter &operator++() {
+    next_();
+    return *this;
+  }
+
+  std::string_view operator*() const { return current; }
+
+  void next_() {
+    auto r = next_word(line, pos);
+    if (r) {
+      pos = r->position.end;
+      current = r->value;
+    } else {
+      pos = std::string::npos;
+    }
+  }
+
+  friend bool operator!=(const words_iter &lhs,
+                         [[maybe_unused]] const eol_iter &rhs) {
+    return lhs.pos != std::string::npos;
+  }
+};
+
 } // namespace detail
 
 template <class C, class T> struct lines {
@@ -282,6 +314,17 @@ struct numbers {
   numbers(std::string_view line, size_t start = 0) : line(line), start{start} {}
 
   auto begin() { return detail::integers_iter<size_t>{line, start}; }
+
+  auto end() { return detail::eol_iter{}; }
+};
+
+struct words {
+  std::string_view line;
+  size_t start;
+
+  words(std::string_view line, size_t start = 0) : line(line), start{start} {}
+
+  auto begin() { return detail::words_iter{line, start}; }
 
   auto end() { return detail::eol_iter{}; }
 };
@@ -460,5 +503,28 @@ inline std::string prepare_file_name(std::string_view file) {
     dpsg::detail::aoc_main(filevar);                                           \
   }                                                                            \
   void dpsg::detail::aoc_main(std::fstream &filevar)
+
+
+template<typename ... Bases>
+struct overload : Bases ...
+{
+    using is_transparent = void;
+    using Bases::operator() ... ;
+};
+
+
+struct char_pointer_hash
+{
+    auto operator()( const char* ptr ) const noexcept
+    {
+        return std::hash<std::string_view>{}( ptr );
+    }
+};
+
+using transparent_string_hash = overload<
+    std::hash<std::string>,
+    std::hash<std::string_view>,
+    char_pointer_hash
+>;
 
 #endif // HEADER_GUARD_UTILS_HPP
