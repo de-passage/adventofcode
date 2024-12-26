@@ -9,5 +9,5 @@ test
 build/
 build-*/
 */input/*
-!*/input/*example*
+!*/input/*exemple*
 !*/input/*test*
