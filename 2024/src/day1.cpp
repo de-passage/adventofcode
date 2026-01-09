@@ -28,5 +28,5 @@ DPSG_AOC_MAIN(file) {
 
     sum_of_distances += std::abs(right - left);
   }
-  std::println("{}", sum_of_distances);
+  dpsg::println("{}", sum_of_distances);
 }

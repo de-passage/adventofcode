@@ -51,23 +51,23 @@ DPSG_AOC_MAIN(file) {
   while (ip < instructions.size() - 1) {
     auto code = instructions[ip];
     auto arg = instructions[ip + 1];
-    std::println("Register A: {}", a);
-    std::println("Register B: {}", b);
-    std::println("Register C: {}", c);
-    std::println("opcode: {}, arg: {}", code, arg);
+    dpsg::println("Register A: {}", a);
+    dpsg::println("Register B: {}", b);
+    dpsg::println("Register C: {}", c);
+    dpsg::println("opcode: {}, arg: {}", code, arg);
     for (int x = 0; x < instructions.size(); x++) {
       if (x == ip) {
-        std::print("\033[1;32m{}\033[0m", instructions[x]);
+        dpsg::print("\033[1;32m{}\033[0m", instructions[x]);
       } else if (x == ip + 1) {
-        std::print("\033[1;36m{}\033[0m", instructions[x]);
+        dpsg::print("\033[1;36m{}\033[0m", instructions[x]);
       } else {
-        std::print("{}", instructions[x]);
+        dpsg::print("{}", instructions[x]);
       }
       if (x != instructions.size() - 1) {
-        std::print(",");
+        dpsg::print(",");
       }
     }
-    std::println("\n\033[1;32m{0:>{1}}\033[m", "^", (ip + 1) * 2 - 1);
+    dpsg::println("\n\033[1;32m{0:>{1}}\033[m", "^", (ip + 1) * 2 - 1);
 
     switch (code) {
     case 0:
@@ -102,22 +102,22 @@ DPSG_AOC_MAIN(file) {
       ip += 2;
       break;
     default:
-      std::println(stderr, "Invalid opcode: {}", code);
+      dpsg::println(stderr, "Invalid opcode: {}", code);
       std::exit(1);
     }
-    std::println();
+    dpsg::println();
   }
 
-  std::println("Register A: {}", a);
-  std::println("Register B: {}", b);
-  std::println("Register C: {}", c);
-  std::print("Output: ");
+  dpsg::println("Register A: {}", a);
+  dpsg::println("Register B: {}", b);
+  dpsg::println("Register C: {}", c);
+  dpsg::print("Output: ");
   for (int x = 0; x < output.size(); x++) {
     if (x == 0) {
-      std::print("{}", output[x]);
+      dpsg::print("{}", output[x]);
     } else {
-      std::print(",{}", output[x]);
+      dpsg::print(",{}", output[x]);
     }
   }
-  std::println();
+  dpsg::println();
 }

@@ -85,6 +85,6 @@ DPSG_AOC_MAIN(file) {
   for (const auto &[id, plot] : plots) {
     sum += plot.area * plot.perimeter;
   }
-  std::println("Sum: {}", sum);
+  dpsg::println("Sum: {}", sum);
   fflush(stdout);
 }

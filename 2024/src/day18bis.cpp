@@ -96,7 +96,7 @@ DPSG_AOC_MAIN(file) {
   for (auto n : additional) {
     obstacles.insert(n);
     if (!dijkstra(pos, target, obstacles)) {
-      std::println("Inserting \033[32m{},{}\033[m breaks the path", n.x, n.y);
+      dpsg::println("Inserting \033[32m{},{}\033[m breaks the path", n.x, n.y);
       break;
     }
   }

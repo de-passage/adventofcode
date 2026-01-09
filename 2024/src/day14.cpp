@@ -1,6 +1,7 @@
 #include "utils.hpp"
 #include <cassert>
 #include "print.hpp"
+#include <format>
 
 struct vec2 {
   int64_t x;
@@ -69,31 +70,31 @@ DPSG_AOC_MAIN(file) {
         .y = after_100.y < 0 ? HEIGHT + after_100.y : after_100.y,
     };
 
-    std::print("Initial: {}, {}\n", v1, v2);
-    std::print("After {} seconds: {}\n", TURNS, after_100);
+    dpsg::print("Initial: {}, {}\n", v1, v2);
+    dpsg::print("After {} seconds: {}\n", TURNS, after_100);
 
     if (after_100.x < WIDTH / 2) {
       if (after_100.y < HEIGHT / 2) {
         top_left++;
-        std::println("Top left");
+        dpsg::println("Top left");
       } else if (after_100.y > HEIGHT / 2) {
         bottom_left++;
-        std::println("Bottom left");
+        dpsg::println("Bottom left");
       }
     } else if (after_100.x > WIDTH / 2) {
       if (after_100.y < HEIGHT / 2) {
         top_right++;
-        std::println("Top right");
+        dpsg::println("Top right");
       } else if (after_100.y > HEIGHT / 2) {
         bottom_right++;
-        std::println("Bottom right");
+        dpsg::println("Bottom right");
       }
     }
-    std::println();
+    dpsg::println();
   }
-  std::println("Top left: {}", top_left);
-  std::println("Top right: {}", top_right);
-  std::println("Bottom left: {}", bottom_left);
-  std::println("Bottom right: {}", bottom_right);
-  std::println("Score: {}", top_left * top_right * bottom_left * bottom_right);
+  dpsg::println("Top left: {}", top_left);
+  dpsg::println("Top right: {}", top_right);
+  dpsg::println("Bottom left: {}", bottom_left);
+  dpsg::println("Bottom right: {}", bottom_right);
+  dpsg::println("Score: {}", top_left * top_right * bottom_left * bottom_right);
 }

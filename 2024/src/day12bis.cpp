@@ -112,7 +112,7 @@ DPSG_AOC_MAIN(file) {
   for (const auto &[id, plot] : plots) {
     sum += plot.area * plot.sides;
   }
-  std::println("Sum: {}", sum);
+  dpsg::println("Sum: {}", sum);
   fflush(stdout);
 }
 

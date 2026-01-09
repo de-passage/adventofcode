@@ -74,5 +74,5 @@ DPSG_AOC_MAIN(file) {
     dfs(trails, x, y, score);
     sum += score;
   }
-  std::println("Result: {}", sum);
+  dpsg::println("Result: {}", sum);
 }

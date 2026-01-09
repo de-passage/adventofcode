@@ -45,5 +45,5 @@ DPSG_AOC_MAIN(file) {
 
 next_line:;
   }
-  std::println("{}", sum);
+  dpsg::println("{}", sum);
 }

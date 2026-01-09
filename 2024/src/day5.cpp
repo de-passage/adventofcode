@@ -52,5 +52,5 @@ DPSG_AOC_MAIN(file) {
     sum += u[u.size() / 2];
     next_iter:;
   }
-  std::println("Sum: {}", sum);
+  dpsg::println("Sum: {}", sum);
 }

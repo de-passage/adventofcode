@@ -79,5 +79,5 @@ DPSG_AOC_MAIN(file) {
     }
   }
 
-  std::println("Antinodes: {}", antinode_set.size());
+  dpsg::println("Antinodes: {}", antinode_set.size());
 }

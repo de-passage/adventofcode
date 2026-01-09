@@ -113,7 +113,7 @@ DPSG_AOC_MAIN(file) {
       }
     }
     std::fflush(stdout);
-    std::println(stderr, "No path found from ({},{})", current.x, current.y);
+    dpsg::println(stderr, "No path found from ({},{})", current.x, current.y);
     exit(1);
   end:;
   }
@@ -171,5 +171,5 @@ DPSG_AOC_MAIN(file) {
       over_100 += count;
     }
   }
-  std::println("Shortcuts over 100 steps: {}", over_100);
+  dpsg::println("Shortcuts over 100 steps: {}", over_100);
 }

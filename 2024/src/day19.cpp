@@ -21,7 +21,7 @@ DPSG_AOC_MAIN(file) {
 
   towel_t towels;
   for(auto word: dpsg::words(line)) {
-    std::println("Adding word: {}", word);
+    dpsg::println("Adding word: {}", word);
     towels.insert(std::string{word});
   }
 
@@ -31,8 +31,8 @@ DPSG_AOC_MAIN(file) {
   int sum = 0;
   while (getline(file, line)) {
     bool ok = can_form(line, towels);
-    std::print("{}: {}\n", line, ok);
+    dpsg::print("{}: {}\n", line, ok);
     sum += ok ? 1 : 0;
   }
-  std::println("Sum: {}", sum);
+  dpsg::println("Sum: {}", sum);
 }

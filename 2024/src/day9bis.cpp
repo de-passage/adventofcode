@@ -23,7 +23,7 @@ static_assert(compute_checksum(3, 3, 5) == 3*3 + 3*4 + 3*5);
 static_assert(compute_checksum(3, 3, 5) == 3*3 + 3*4 + 3*5);
 
 DPSG_AOC_MAIN(file) {
-  std::println("Reading file");
+  dpsg::println("Reading file");
   std::string line;
   std::getline(file, line);
 
@@ -75,5 +75,5 @@ DPSG_AOC_MAIN(file) {
                                  current_file.start + current_file.size - 1);
   }
 
-  std::println("Checksum: {}", checksum);
+  dpsg::println("Checksum: {}", checksum);
 }

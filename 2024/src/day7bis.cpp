@@ -84,9 +84,9 @@ DPSG_AOC_MAIN(file) {
     auto last = sum;
     if (r) { sum += target;}
     if (sum < last) {
-      std::println("Overflow: ", sum, " < ", last);
+      dpsg::println("Overflow: ", sum, " < ", last);
       break;
     }
   }
-  std::println("Sum: {}", sum);
+  dpsg::println("Sum: {}", sum);
 }

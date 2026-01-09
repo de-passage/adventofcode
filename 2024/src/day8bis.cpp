@@ -90,15 +90,15 @@ DPSG_AOC_MAIN(file) {
     for (int y = 0; y < bounds.y; ++y) {
       for (int x = 0; x < bounds.x; ++x) {
         if (symbols.contains(coord_t{x, y})) {
-          std::print("{}", symbols[coord_t{x, y}]);
+          dpsg::print("{}", symbols[coord_t{x, y}]);
         } else if (antinode_set.contains(coord_t{x, y})) {
-          std::print("#");
+          dpsg::print("#");
         } else {
-          std::print(".");
+          dpsg::print(".");
         }
       }
-      std::println();
+      dpsg::println();
     }
   }
-  std::println("Antinodes: {}", antinode_set.size());
+  dpsg::println("Antinodes: {}", antinode_set.size());
 }

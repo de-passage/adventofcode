@@ -126,6 +126,6 @@ DPSG_AOC_MAIN(file) {
       to_visit.push(std::move(new_p));
     }
   }
-  std::println("Best path: {}", max_distance);
-  std::println("Answer: {}", positions.size());
+  dpsg::println("Best path: {}", max_distance);
+  dpsg::println("Answer: {}", positions.size());
 }

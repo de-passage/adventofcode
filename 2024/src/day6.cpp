@@ -86,5 +86,5 @@ DPSG_AOC_MAIN(file) {
     }
     guard = next;
   }
-  std::println("Count: {}", visited.size());
+  dpsg::println("Count: {}", visited.size());
 }

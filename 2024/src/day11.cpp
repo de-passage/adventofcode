@@ -41,5 +41,5 @@ DPSG_AOC_MAIN(file) {
     numbers = std::move(next_numbers);
   }
 
-  std::println("Result: {}", numbers.size());
+  dpsg::println("Result: {}", numbers.size());
 }

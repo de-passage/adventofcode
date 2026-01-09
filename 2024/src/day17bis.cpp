@@ -66,7 +66,7 @@ std::vector<size_t> simulate(const std::vector<size_t> instructions, size_t a,
       ip += 2;
       break;
     default:
-      std::println(stderr, "Invalid opcode: {}", code);
+      dpsg::println(stderr, "Invalid opcode: {}", code);
       std::exit(1);
     }
   }
@@ -102,21 +102,21 @@ DPSG_AOC_MAIN(file) {
     auto output = simulate(instructions, a, b, c);
 
     if (output.size() == 1 && output[0] == instructions.back()) {
-      std::print("Found a match for a = {}:\n", a);
+      dpsg::print("Found a match for a = {}:\n", a);
       possibilities.insert(a);
     }
   }
 
   for (int i = instructions.size() - 2; i >= 0; --i) {
     auto target = std::span(instructions).subspan(i);
-    std::print("Trying to generate: ");
+    dpsg::print("Trying to generate: ");
     for (int i = 0; i < target.size(); ++i) {
       if (i != 0)
-        std::print(",");
-      std::print("{}", target[i]);
+        dpsg::print(",");
+      dpsg::print("{}", target[i]);
     }
-    std::println();
-    std::println("Possibilities: {}", possibilities.size());
+    dpsg::println();
+    dpsg::println("Possibilities: {}", possibilities.size());
 
     std::unordered_set<size_t> found;
     for (auto p : possibilities) {
@@ -126,7 +126,7 @@ DPSG_AOC_MAIN(file) {
         auto output = simulate(instructions, a, b, c);
 
         if (std::ranges::equal(output, target)) {
-          std::print("Found a match for a = {0} ({0:b})\n", a);
+          dpsg::print("Found a match for a = {0} ({0:b})\n", a);
           found.insert(a);
         }
       }
@@ -139,6 +139,6 @@ DPSG_AOC_MAIN(file) {
   for (auto p : possibilities) {
     min = std::min(min, p);
   }
-  std::print("Minimum value for a: {}\n", min);
+  dpsg::print("Minimum value for a: {}\n", min);
 
 }

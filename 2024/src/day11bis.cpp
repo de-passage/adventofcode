@@ -46,5 +46,5 @@ DPSG_AOC_MAIN(file) {
   for (auto [k, n] : numbers) {
     sum += n;
   }
-  std::println("Result: {}", sum);
+  dpsg::println("Result: {}", sum);
 }

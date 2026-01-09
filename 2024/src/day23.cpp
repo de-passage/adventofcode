@@ -54,9 +54,9 @@ DPSG_AOC_MAIN(file) {
 
   for (const auto &network : networks) {
     for (const auto &node : network) {
-      std::print("{} ->", node);
+      dpsg::print("{} ->", node);
     }
-    std::println();
+    dpsg::println();
   }
-  std::println("Found {} networks", networks.size());
+  dpsg::println("Found {} networks", networks.size());
 }

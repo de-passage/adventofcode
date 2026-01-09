@@ -62,7 +62,7 @@ template <class F> void time(F f) {
   tp start = clock::now();
   f();
   tp end = clock::now();
-  std::println("Took {}", duration_cast<microseconds>(end - start));
+  dpsg::println("Took {}", duration_cast<microseconds>(end - start));
 }
 
 using edge = std::pair<coord_t, coord_t>;
@@ -192,18 +192,18 @@ DPSG_AOC_MAIN(file) {
     } // loop over each line
 
     for (int i = 0; i < upward_edges.size(); i++) {
-      std::print("Edges on column: {}\n", i);
+      dpsg::print("Edges on column: {}\n", i);
       for (auto [a, b] : upward_edges[i]) {
-        std::print("({}, {}) -> ({}, {}), ", a.x, a.y, b.x, b.y);
+        dpsg::print("({}, {}) -> ({}, {}), ", a.x, a.y, b.x, b.y);
       }
-      std::println();
+      dpsg::println();
     }
     for (int i = 0; i < rightward_edges.size(); i++) {
-      std::print("Edges on line: {}\n", i);
+      dpsg::print("Edges on line: {}\n", i);
       for (auto [a, b] : rightward_edges[i]) {
-        std::print("({}, {}) -> ({}, {}), ", a.x, a.y, b.x, b.y);
+        dpsg::print("({}, {}) -> ({}, {}), ", a.x, a.y, b.x, b.y);
       }
-      std::println();
+      dpsg::println();
     }
   });
 }

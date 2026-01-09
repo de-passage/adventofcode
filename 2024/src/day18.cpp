@@ -69,7 +69,7 @@ DPSG_AOC_MAIN(file) {
     to_visit.pop();
 
     if (current == target) {
-      std::print("Path found with weight: {}\n", weight);
+      dpsg::print("Path found with weight: {}\n", weight);
       break;
     }
 

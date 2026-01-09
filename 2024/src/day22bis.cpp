@@ -92,11 +92,11 @@ DPSG_AOC_MAIN(file) {
 
   assert(m != values.end());
 
-  std::println("Found: {}", m->second);
-  std::print("Sequence: ");
+  dpsg::println("Found: {}", m->second);
+  dpsg::print("Sequence: ");
   for (int i = 0; i < 4; ++i) {
-    std::print("{},", m->first.last[i]);
+    dpsg::print("{},", m->first.last[i]);
   }
-  std::println();
-  std::println("Sum: {}", sum);
+  dpsg::println();
+  dpsg::println("Sum: {}", sum);
 }

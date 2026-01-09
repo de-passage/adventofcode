@@ -131,5 +131,5 @@ DPSG_AOC_MAIN(file) {
       to_visit.push({{x + rx, y + ry}, current.a, current.b + 1});
     }
   }
-  std::println("total: {}", token);
+  dpsg::println("total: {}", token);
 }

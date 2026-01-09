@@ -34,5 +34,5 @@ DPSG_AOC_MAIN(file) {
     sum_of_products += last_product;
   }
 
-  std::println("{}", sum_of_products);
+  dpsg::println("{}", sum_of_products);
 }

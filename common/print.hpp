@@ -20,10 +20,11 @@
 #  ifdef __cpp_lib_print
 #    include <print>
 #    define DPSG_HAVE_STD_PRINT 1
-#  endif
-#  ifdef __cpp_lib_format
+#  elif defined __cpp_lib_format
 #    include <format>
 #    define DPSG_HAVE_STD_FORMAT 1
+#  else
+#   error "No suitable print implementation found. Please use a compiler with C++23 std::print or C++20 std::format support."
 #  endif
 #endif
 
@@ -44,6 +45,10 @@ inline void println(const std::format_string<Args...>& fmt, Args&&... args)
     std::putchar('\n');
 }
 
+inline void println() {
+    std::println();
+}
+
 #elif defined(DPSG_HAVE_STD_FORMAT)
 
 template <class... Args>
@@ -60,22 +65,15 @@ inline void println(const std::format_string<Args...>& fmt, Args&&... args)
     std::printf("%s\n", s.c_str());
 }
 
-#else
-
-// Fallback: assume caller uses printf-style formatting. This is the
-// weakest fallback but allows builds to succeed on older standard libs.
-template <class... Args>
-inline void print(const char* fmt, Args&&... args)
-{
-    std::printf(fmt, std::forward<Args>(args)...);
-}
-
-template <class... Args>
-inline void println(const char* fmt, Args&&... args)
-{
-    std::printf(fmt, std::forward<Args>(args)...);
+inline void println() {
     std::putchar('\n');
 }
+
+#else 
+
+// Error above, these stubs are here to avoid printing too much redondant info
+inline void print(...) {}
+inline void println(...) {}
 
 #endif
 

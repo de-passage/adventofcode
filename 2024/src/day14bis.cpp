@@ -90,12 +90,12 @@ DPSG_AOC_MAIN(file) {
     if (line_count > 5) {
       for (int i = 0; i < HEIGHT; ++i) {
         for (int j = 0; j < WIDTH; ++j) {
-          std::print("{}", grid[i * WIDTH + j]);
+          dpsg::print("{}", grid[i * WIDTH + j]);
         }
-        std::println();
+        dpsg::println();
       }
 
-      std::println("Current turn {}", turn);
+      dpsg::println("Current turn {}", turn);
       getchar();
     }
 

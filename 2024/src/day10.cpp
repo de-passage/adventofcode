@@ -77,7 +77,7 @@ DPSG_AOC_MAIN(file) {
     dfs(trails, x, y, reachable_trailheads);
     sum += reachable_trailheads.size();
   }
-  std::println("Result: {}", sum);
+  dpsg::println("Result: {}", sum);
 
 
 }

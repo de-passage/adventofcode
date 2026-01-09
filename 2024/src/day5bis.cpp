@@ -78,12 +78,12 @@ DPSG_AOC_MAIN(file) {
 
   int sum = 0;
   for (auto& inv: invalids) {
-    std::print("inv: ");
+    dpsg::print("inv: ");
     for (auto i : inv) {
-      std::print("{}, ", i);
+      dpsg::print("{}, ", i);
     }
-    std::println();
+    dpsg::println();
     sum += inv[inv.size() / 2];
   }
-  std::println("sum: {}", sum);
+  dpsg::println("sum: {}", sum);
 }

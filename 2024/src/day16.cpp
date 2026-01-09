@@ -81,7 +81,7 @@ DPSG_AOC_MAIN(file) {
 
 
     if (current.v == end) {
-      std::println("Found path with weight {}", current.weight);
+      dpsg::println("Found path with weight {}", current.weight);
       break;
     }
 

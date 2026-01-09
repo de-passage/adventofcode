@@ -23,7 +23,7 @@ size_t can_form(std::string_view word, const towel_t &towels, cache_t& cache) {
       }
     }
   }
-  std::println("ways to form '{}': {}", word, sum);
+  dpsg::println("ways to form '{}': {}", word, sum);
   cache[std::string{word}] = sum;
   return sum;
 }
@@ -34,7 +34,7 @@ DPSG_AOC_MAIN(file) {
 
   towel_t towels;
   for (auto word : dpsg::words(line)) {
-    std::println("Adding word: {}", word);
+    dpsg::println("Adding word: {}", word);
     towels.insert(std::string{word});
   }
 
@@ -45,8 +45,8 @@ DPSG_AOC_MAIN(file) {
   cache_t cache;
   while (getline(file, line)) {
     size_t ok = can_form(line, towels, cache);
-    std::print("{}: {}\n", line, ok);
+    dpsg::print("{}: {}\n", line, ok);
     sum += ok;
   }
-  std::println("Sum: {}", sum);
+  dpsg::println("Sum: {}", sum);
 }

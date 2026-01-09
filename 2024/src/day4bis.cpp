@@ -22,9 +22,9 @@ DPSG_AOC_MAIN(file) {
       if (line[j] == 'A' && mors(lines[i - 1][j - 1], lines[i + 1][j + 1]) &&
           mors(lines[i - 1][j + 1], lines[i + 1][j - 1])) {
         sum += 1;
-        std::println("found at {} {}", i, j);
+        dpsg::println("found at {} {}", i, j);
       }
     }
   }
-  std::println("{}", sum);
+  dpsg::println("{}", sum);
 }
