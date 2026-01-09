@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include "print.hpp"
 #include <unordered_set>
+#include <span>
+#include <limits>
 
 #define unwrap(X)                                                              \
   ([](auto &&x) {                                                              \

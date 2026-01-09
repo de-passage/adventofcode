@@ -1,6 +1,7 @@
 #include "utils.hpp"
 #include <cassert>
 #include "print.hpp"
+#include <format>
 
 struct vec2 {
   int64_t x;
