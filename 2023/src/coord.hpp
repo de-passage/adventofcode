@@ -14,11 +14,13 @@ using coord = basic_coord<int>;
 
 } // namespace dpsg
 
-template <class T> struct ::std::hash<dpsg::basic_coord<T>> {
-  size_t operator()(dpsg::basic_coord<T> c) const {
-    return (c.x << (sizeof(T) / 2)) + c.y;
+namespace std {
+template <class T> struct hash<dpsg::basic_coord<T>> {
+  size_t operator()(dpsg::basic_coord<T> const &c) const noexcept {
+    return (static_cast<size_t>(c.x) << (sizeof(T) / 2)) + static_cast<size_t>(c.y);
   }
 };
+} // namespace std
 
 namespace dpsg {
 

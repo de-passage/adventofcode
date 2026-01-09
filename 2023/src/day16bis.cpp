@@ -49,6 +49,4 @@ DPSG_AOC_MAIN(file) {
   }
 
   std::cout << "Max cells energized: " << (vt100::bold | vt100::green) << count << vt100::reset << std::endl;
-
-  return 0;
 }

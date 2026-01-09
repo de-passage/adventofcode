@@ -24,6 +24,4 @@ DPSG_AOC_MAIN(file) {
     logln("Sum: ", s, "\tAcc: ", acc);
   }
   std::cout << "Acc: " << acc << "\n" << endl;
-
-  return 0;
 }

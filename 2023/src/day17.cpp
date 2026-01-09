@@ -60,6 +60,8 @@ std::ostream &operator<<(std::ostream &os, colored<direction> d) {
     return os << "←" << reset;
   case direction::right:
     return os << "→" << reset;
+  default: // shouldn't happen
+    return os;
   }
 }
 
@@ -100,7 +102,7 @@ struct node {
   coordinates pos;
   int distance;
   int steps;
-  direction direction;
+  direction dir;
 
   directed_coordinates last;
 };
@@ -140,7 +142,7 @@ int main(int argc, const char **argv) {
       .pos = coordinates{0, 0},
       .distance = 0,
       .steps = 0,
-      .direction = direction::right,
+      .dir = direction::right,
       .last = {coordinates{0, 0}, direction::right},
   };
 
@@ -160,7 +162,7 @@ int main(int argc, const char **argv) {
       logln(" -> ", faint|red, "Out of bounds", reset);
       return;
     }
-    if (current_node.direction == dir && current_node.steps >= 2) {
+    if (current_node.dir == dir && current_node.steps >= 2) {
       logln(" -> ", faint|red, " too many steps", reset);
       return;
     }
@@ -168,12 +170,11 @@ int main(int argc, const char **argv) {
     auto new_node = node{
         .pos = next,
         .distance = current_node.distance + grid[next.x][next.y],
-        .steps = current_node.direction == dir ? current_node.steps + 1 : 0,
-        .direction = dir,
-        .last = {current_node.pos, current_node.direction},
+        .steps = current_node.dir == dir ? current_node.steps + 1 : 0,
+        .dir = dir,
+        .last = {current_node.pos, current_node.dir},
     };
-    logln(" -> ", faint|green, "valid", reset|faint, " with distance ", green|bold, new_node.distance, reset|faint, " and steps ", cyan|bold, new_node.steps, reset|faint, " and direction ", magenta|bold, new_node.direction);
-
+    logln(" -> ", faint|green, "valid", reset|faint, " with distance ", green|bold, new_node.distance, reset|faint, " and steps ", cyan|bold, new_node.steps, reset|faint, " and direction ", magenta|bold, new_node.dir);
     to_visit.emplace(move(new_node));
   };
 
@@ -187,7 +188,7 @@ int main(int argc, const char **argv) {
     // Print the logs for the current node
     logln("Considering ", current.pos, vt100::reset, " with distance ",
           vt100::green | vt100::bold, current.distance, vt100::reset,
-          " and direction ", vt100::magenta | vt100::bold, current.direction,
+          " and direction ", vt100::magenta | vt100::bold, current.dir,
           vt100::reset, " and steps ", vt100::cyan | vt100::bold, current.steps,
           ".", vt100::reset);
 
@@ -204,7 +205,7 @@ int main(int argc, const char **argv) {
           if (coordinates{static_cast<int>(i), static_cast<int>(j)} ==
               current.pos) {
             out << (vt100::reset | vt100::red | vt100::bold)
-                << colored{current.direction};
+                << colored{current.dir};
             found = true;
           } else {
             for (auto &n : current_path) {
@@ -227,7 +228,7 @@ int main(int argc, const char **argv) {
 
     log(vt100::reset|vt100::faint, " -> ");
 
-    auto v = visited.find({{current.pos, current.direction}, current.steps});
+    auto v = visited.find({{current.pos, current.dir}, current.steps});
     if (v != visited.end()) {
       log(vt100::faint, "Already visited\n", vt100::faint, " --> ");
       if (v->second.distance > current.distance) {
@@ -235,8 +236,8 @@ int main(int argc, const char **argv) {
         logln("with higher distance, ", vt100::underline, "updating",
               vt100::reset);
         auto last_path = visited_paths[{current.last.pos, current.last.dir}];
-        auto& current_path = visited_paths[{current.pos, current.direction}];
-        last_path.push_back({current.pos, current.direction});
+        auto& current_path = visited_paths[{current.pos, current.dir}];
+        last_path.push_back({current.pos, current.dir});
         current_path = move(last_path);
       } else {
         logln("with lower distance, ", vt100::underline, "ignoring",
@@ -249,11 +250,11 @@ int main(int argc, const char **argv) {
       auto p = visited_paths.find(current.last);
       auto current_path =
           p != visited_paths.end() ? p->second : vector<directed_coordinates>{};
-      current_path.push_back({current.pos, current.direction});
-      visited_paths[{current.pos, current.direction}] = move(current_path);
+      current_path.push_back({current.pos, current.dir});
+      visited_paths[{current.pos, current.dir}] = move(current_path);
     }
 
-    visited.emplace(directed_coordinates_and_steps{{current.pos, current.direction}, current.steps},
+    visited.emplace(directed_coordinates_and_steps{{current.pos, current.dir}, current.steps},
                     current);
 
     if (current.pos == target) {
@@ -270,16 +271,16 @@ int main(int argc, const char **argv) {
     auto left = coordinates{x, y - 1};
     auto right = coordinates{x, y + 1};
 
-    if (current.direction != direction::down) {
+    if (current.dir != direction::down) {
       create_new_node_if_valid(current, up, direction::up);
     }
-    if (current.direction != direction::up) {
+    if (current.dir != direction::up) {
       create_new_node_if_valid(current, down, direction::down);
     }
-    if (current.direction != direction::right) {
+    if (current.dir != direction::right) {
       create_new_node_if_valid(current, left, direction::left);
     }
-    if (current.direction != direction::left) {
+    if (current.dir != direction::left) {
       create_new_node_if_valid(current, right, direction::right);
     }
   }

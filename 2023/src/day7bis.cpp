@@ -29,6 +29,8 @@ ostream& operator<<(ostream& os, const play& p) {
 }
 
 int main(int argc, const char **argv) {
+  using namespace dpsg;
+
   auto file = get_input("day7.txt", argc, argv);
 
   vector<play> plays;

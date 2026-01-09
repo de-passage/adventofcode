@@ -75,6 +75,4 @@ DPSG_AOC_MAIN(file) {
     logln();
   }
   cout << sum << endl;
-
-  return 0;
 }

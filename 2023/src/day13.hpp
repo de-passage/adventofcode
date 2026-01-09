@@ -20,7 +20,7 @@ void parse_grid(Generator &&f, Consumer &&c) {
   }
 }
 
-auto get_line(auto &file) {
+auto get_line(auto &filename) {
   struct {
     auto operator()() {
       std::string line;
@@ -29,8 +29,8 @@ auto get_line(auto &file) {
       }
       return std::optional<std::string>{};
     }
-    decltype(file) &file;
-  } getline{file};
+    decltype(filename) &file;
+  } getline{filename};
   return getline;
 }
 

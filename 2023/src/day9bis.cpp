@@ -30,6 +30,4 @@ DPSG_AOC_MAIN(file) {
     logln();
   }
   std::cout << "Acc: " << acc << "\n" << endl;
-
-  return 0;
 }

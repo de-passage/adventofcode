@@ -356,7 +356,7 @@ next_line:;
 
         if (it ==
             data[orig_row].cend()) { // There are no more blockers on this line
-          logln(decorate{comment, " => No more blockers on this line"});
+          logln(decorate(comment, " => No more blockers on this line"));
           continue;
         }
 

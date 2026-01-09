@@ -59,6 +59,8 @@ std::ostream &operator<<(std::ostream &os, colored<direction> d) {
     return os << "←" << reset;
   case direction::right:
     return os << "→" << reset;
+  default:
+    return os;
   }
 }
 
@@ -99,7 +101,7 @@ struct node {
   coordinates pos;
   int distance;
   int steps;
-  direction direction;
+  direction dir;
 
   directed_coordinates last;
 };
@@ -137,7 +139,7 @@ DPSG_AOC_MAIN(file) {
       .pos = coordinates{0, 0},
       .distance = 0,
       .steps = 0,
-      .direction = direction::right,
+      .dir = direction::right,
       .last = {coordinates{0, 0}, direction::right},
   };
 
@@ -153,19 +155,19 @@ DPSG_AOC_MAIN(file) {
         next.y >= static_cast<int>(grid[0].size())) {
       return;
     }
-    if (current_node.direction == dir && current_node.steps >= 9) {
+    if (current_node.dir == dir && current_node.steps >= 9) {
       return;
     }
-    if (current_node.direction != dir && current_node.steps < 3) {
+    if (current_node.dir != dir && current_node.steps < 3) {
       return;
     }
 
     auto new_node = node{
         .pos = next,
         .distance = current_node.distance + grid[next.x][next.y],
-        .steps = current_node.direction == dir ? current_node.steps + 1 : 0,
-        .direction = dir,
-        .last = {current_node.pos, current_node.direction},
+        .steps = current_node.dir == dir ? current_node.steps + 1 : 0,
+        .dir = dir,
+        .last = {current_node.pos, current_node.dir},
     };
     to_visit.emplace(move(new_node));
   };
@@ -177,7 +179,7 @@ DPSG_AOC_MAIN(file) {
     auto current = to_visit.top();
     to_visit.pop();
 
-    auto v = visited.find({{current.pos, current.direction}, current.steps});
+    auto v = visited.find({{current.pos, current.dir}, current.steps});
     if (v != visited.end()) {
       if (v->second.distance > current.distance) {
         v->second = current;
@@ -186,7 +188,7 @@ DPSG_AOC_MAIN(file) {
       }
     }
     visited.emplace(
-        directed_coordinates_and_steps{{current.pos, current.direction},
+        directed_coordinates_and_steps{{current.pos, current.dir},
                                        current.steps},
         current);
 
@@ -202,19 +204,19 @@ DPSG_AOC_MAIN(file) {
 
     auto [x, y] = current.pos;
 
-    if (current.direction != direction::down) {
+    if (current.dir != direction::down) {
       auto up = coordinates{x - 1, y};
       create_new_node_if_valid(current, up, direction::up);
     }
-    if (current.direction != direction::up) {
+    if (current.dir != direction::up) {
       auto down = coordinates{x + 1, y};
       create_new_node_if_valid(current, down, direction::down);
     }
-    if (current.direction != direction::right) {
+    if (current.dir != direction::right) {
       auto left = coordinates{x, y - 1};
       create_new_node_if_valid(current, left, direction::left);
     }
-    if (current.direction != direction::left) {
+    if (current.dir != direction::left) {
       auto right = coordinates{x, y + 1};
       create_new_node_if_valid(current, right, direction::right);
     }

@@ -46,7 +46,4 @@ DPSG_AOC_MAIN(file) {
   }
 
   std::cout << mass << std::endl;
-
-
-  return 0;
 }

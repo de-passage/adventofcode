@@ -8,16 +8,16 @@
 
 using module_list = std::vector<std::string>;
 
-enum class pulse {
+enum class pulse_t {
   high,
   low,
 };
 
 struct module_map {
   std::unordered_map<std::string, std::unique_ptr<struct basic_module>> modules;
-  std::vector<std::tuple<std::string, std::string, pulse>> pulses;
+  std::vector<std::tuple<std::string, std::string, pulse_t>> pulses;
 
-  void pulse(const std::string &from, const std::string &to, pulse p) {
+  void pulse(const std::string &from, const std::string &to, pulse_t p) {
     pulses.emplace_back(from, to, p);
   }
 
@@ -34,7 +34,7 @@ struct module_map {
   size_t high_count() const { return _high_count; }
 
 private:
-  void _do_pulse(const std::string &from, const std::string &to, enum pulse p);
+  void _do_pulse(const std::string &from, const std::string &to, pulse_t p);
   size_t _high_count = 0;
   size_t _low_count = 0;
 };
@@ -56,29 +56,29 @@ protected:
     to._inputs.push_back(from._name);
   }
 
-  void send(pulse p) {
+  void send(pulse_t p) {
     for (auto &output : _outputs) {
       ports->pulse(_name, output, p);
     }
   }
 
-  void send_low() { send(pulse::low); }
-  void send_high() { send(pulse::high); }
+  void send_low() { send(pulse_t::low); }
+  void send_high() { send(pulse_t::high); }
 
 public:
-  virtual void receive(const std::string &from, pulse p) = 0;
+  virtual void receive(const std::string &from, pulse_t p) = 0;
   virtual ~basic_module() = default;
   virtual bool is_in_initial_state() const = 0;
 };
 
 void module_map::_do_pulse(const std::string &from, const std::string &to,
-                           enum pulse p) {
+                           pulse_t p) {
   using namespace dpsg::vt100;
   dpsg::logln((bold | green), from, reset | bold, " -",
-              (p == pulse::high ? "high" : "low"), "-> ", (bold | green), to,
+              (p == pulse_t::high ? "high" : "low"), "-> ", (bold | green), to,
               reset);
   modules.at(to)->receive(from, p);
-  if (p == pulse::high) {
+  if (p == pulse_t::high) {
     ++_high_count;
   } else {
     ++_low_count;
@@ -88,7 +88,7 @@ void module_map::_do_pulse(const std::string &from, const std::string &to,
 struct debug_module : basic_module {
   debug_module(module_map *ports, std::string name)
       : basic_module(ports, std::move(name)) {}
-  virtual void receive(const std::string &, pulse) override {
+  virtual void receive(const std::string &, pulse_t) override {
     // Nothing to do
   }
   virtual bool is_in_initial_state() const override { return true; }
@@ -98,7 +98,7 @@ struct broadcaster : basic_module {
   broadcaster(module_map *ports, std::string name)
       : basic_module(ports, std::move(name)) {}
 
-  virtual void receive(const std::string &, pulse p) override { send(p); }
+  virtual void receive(const std::string &, pulse_t p) override { send(p); }
   virtual bool is_in_initial_state() const override { return true; }
 };
 
@@ -108,8 +108,8 @@ struct flip_flop : basic_module {
   flip_flop(module_map *ports, std::string name)
       : basic_module(ports, std::move(name)) {}
 
-  virtual void receive(const std::string &, pulse p) override {
-    if (p == pulse::low) {
+  virtual void receive(const std::string &, pulse_t p) override {
+    if (p == pulse_t::low) {
       if (state == state::on) {
         state = state::off;
         send_low();
@@ -133,8 +133,8 @@ struct conjunction : basic_module {
 
   std::unordered_set<std::string> inputs_state;
 
-  virtual void receive(const std::string &from, pulse p) override {
-    if (p == pulse::low) {
+  virtual void receive(const std::string &from, pulse_t p) override {
+    if (p == pulse_t::low) {
       inputs_state.erase(from);
       send_high();
     } else {
@@ -226,7 +226,7 @@ DPSG_AOC_MAIN(file) {
   auto it = 0;
 
   do {
-    modules.pulse("button", "broadcaster", pulse::low);
+    modules.pulse("button", "broadcaster", pulse_t::low);
     while (modules.process_pulse()) { /* nothing more to do here */
     }
     logln("Pulse count at iteration ", (bold | blue), ++it, reset, " : low pulses ",
