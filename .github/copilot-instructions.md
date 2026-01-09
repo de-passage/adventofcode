@@ -27,12 +27,18 @@ mkdir -p build
 cmake -S . -B build
 cmake --build build --parallel
 ```
-- After build, run the day's executable and point it at the input file (or let it open inputs internally):
+- Important: this project uses a CMake helper (`cmake/add_day.cmake`) which dynamically defines per-day targets.
+  - For each day N the helper creates:
+    - executable target: `dayN` (and `dayNbis` if `src/dayNbis.cpp` exists)
+    - run targets: `run-dayN` and `run-dayN-example` which invoke the built binary with the real or example input respectively
+  - Example: to build and run day 12 you can either build the executable or use the run target:
 ```
-./build/day12     # or the executable name shown by CMake
-./build/day12 < input/day12.txt
+cmake --build build --target day12
+cmake --build build --target run-day12
+cmake --build build --target run-day12-example
 ```
-- If a year uses a simple `Makefile` (older years), run `cd 2022 && make` and execute the produced binary.
+- The run targets also depend on a custom command that fetches the puzzle input (via `scripts/get_input.bash`) and will produce `input/dayN.txt` if missing. That script expects a session token at `$XDG_CONFIG_HOME/aoc/session`.
+- Older years may use a plain `Makefile` (e.g. `2022/Makefile`) — in that case build there with `cd YEAR && make`.
 - Always inspect the day's source to see whether it reads `argv` filenames, uses hardcoded filenames, or expects stdin.
 
 Adding a new day (correct placement)
