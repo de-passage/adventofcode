@@ -1,6 +1,6 @@
 #include "utils.hpp"
 #include <cassert>
-#include <print>
+#include "print.hpp"
 
 bool mors(char l, char r) {
   return (l == 'M' && r == 'S') || (r == 'M' && l == 'S');

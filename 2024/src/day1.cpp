@@ -1,6 +1,6 @@
 #include "utils.hpp"
 #include <cassert>
-#include <print>
+#include "print.hpp"
 
 DPSG_AOC_MAIN(file) {
   std::vector<int> left_values;

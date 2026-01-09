@@ -1,6 +1,6 @@
 #include "utils.hpp"
 #include <cassert>
-#include <print>
+#include "print.hpp"
 #include <ranges>
 #include <unordered_map>
 #include <unordered_set>

@@ -1,6 +1,6 @@
 #include "utils.hpp"
 #include <cmath>
-#include <print>
+#include "print.hpp"
 
 int digit_count(long t) {
   int count = 0;

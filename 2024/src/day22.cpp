@@ -1,5 +1,5 @@
 #include "utils.hpp"
-#include <print>
+#include "print.hpp"
 
 constexpr size_t mix(size_t secret, size_t x) { return secret ^ x; }
 static_assert(mix(42, 15) == 37);

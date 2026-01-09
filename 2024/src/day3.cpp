@@ -1,5 +1,5 @@
 #include "utils.hpp"
-#include <print>
+#include "print.hpp"
 
 enum state { IDENT, NUMBER_FST, NUMBER_SND, };
 

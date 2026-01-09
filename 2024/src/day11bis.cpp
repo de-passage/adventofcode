@@ -1,7 +1,7 @@
 #include "utils.hpp"
 #include <chrono>
 #include <cmath>
-#include <print>
+#include "print.hpp"
 #include <unordered_map>
 
 int digit_count(long t) {

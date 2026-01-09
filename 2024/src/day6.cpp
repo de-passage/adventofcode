@@ -1,6 +1,6 @@
 #include "utils.hpp"
 #include <cassert>
-#include <print>
+#include "print.hpp"
 #include <unordered_set>
 
 struct coord_t {

@@ -1,6 +1,6 @@
 #include "utils.hpp"
 #include <cassert>
-#include <print>
+#include "print.hpp"
 
 int count(std::vector<std::string> &lines) {
   int sum = 0;

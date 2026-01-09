@@ -1,7 +1,7 @@
 #include "utils.hpp"
 #include <algorithm>
 #include <cassert>
-#include <print>
+#include "print.hpp"
 #include <unordered_map>
 #include <unordered_set>
 

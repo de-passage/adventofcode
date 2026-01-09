@@ -1,7 +1,7 @@
 #include "utils.hpp"
 #include <cassert>
 #include <cstdlib>
-#include <print>
+#include "print.hpp"
 #include <unordered_set>
 
 #define unwrap(X)                                                              \

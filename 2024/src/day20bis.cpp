@@ -1,7 +1,7 @@
 #include "utils.hpp"
 #include <cassert>
 #include <limits>
-#include <print>
+#include "print.hpp"
 #include <queue>
 #include <ranges>
 #include <unordered_map>

@@ -1,6 +1,6 @@
 #include "utils.hpp"
 #include <cassert>
-#include <print>
+#include "print.hpp"
 #include <ranges>
 
 bool is_valid(const std::vector<int> &numbers) {
