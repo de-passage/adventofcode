@@ -5,10 +5,9 @@
 #include <algorithm>
 #include <queue>
 
-int main(int argc, const char **argv) {
+DPSG_AOC_MAIN(file) {
   using namespace std;
   using namespace dpsg;
-  auto file = get_input("day16.txt", argc, argv);
 
   string line;
   using grid = vector<vector<cell>>;

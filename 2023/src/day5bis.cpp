@@ -1,11 +1,9 @@
 #include "utils.hpp"
 #include <algorithm>
 
-int main(int argc, const char **argv) {
+DPSG_AOC_MAIN(file) {
   using namespace std;
   using namespace dpsg;
-
-  auto file = get_input("day5.txt", argc, argv);
 
   string line;
   getline(file, line);

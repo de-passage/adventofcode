@@ -1,10 +1,8 @@
 #include "utils.hpp"
 #include <algorithm>
 
-int main(int argc, const char ** argv) {
-    using namespace std;
-
-  auto file = get_input("day5.txt", argc, argv);
+DPSG_AOC_MAIN(file) {
+  using namespace std;
 
   string line;
   getline(file, line);

@@ -4,9 +4,7 @@
 using namespace std;
 using namespace dpsg;
 
-int main(int argc, const char **argv) {
-  auto file = get_input("day12.txt", argc, argv);
-
+DPSG_AOC_MAIN(file) {
   string line;
   size_t s = 0;
   while (getline(file, line)) {

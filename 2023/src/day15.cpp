@@ -6,8 +6,7 @@
 using namespace std;
 using namespace dpsg;
 
-int main(int argc, const char** argv) {
-  auto file = get_input("day15.txt", argc, argv);
+DPSG_AOC_MAIN(file) {
 
   vector<int> data;
   string line;

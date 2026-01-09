@@ -2,10 +2,9 @@
 #include <cmath>
 
 
-int main(int argc, const char** argv) {
+DPSG_AOC_MAIN(file) {
   using namespace std;
   using namespace dpsg;
-  auto file = get_input("day6.txt", argc, argv);
 
   vector<int> times;
   vector<int> distances;

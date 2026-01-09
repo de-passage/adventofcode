@@ -8,9 +8,7 @@ struct mass_counter {
   int count = 0;
 };
 
-int main(int argc, const char **argv) {
-  auto file = get_input("day14.txt", argc, argv);
-
+DPSG_AOC_MAIN(file) {
   string line;
   size_t line_count = 0;
   vector<vector<mass_counter>> data;

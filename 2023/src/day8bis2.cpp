@@ -35,10 +35,9 @@ inline std::string to_string(node n) {
 }
 
 
-int main(int argc, const char **argv) {
+DPSG_AOC_MAIN(file) {
   using namespace std;
   using namespace dpsg;
-  auto file = get_input("day8.txt", argc, argv);
 
   string instruction_str;
   instruction_str.reserve(300);

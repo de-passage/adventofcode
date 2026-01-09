@@ -2,10 +2,9 @@
 #include <string>
 #include <unordered_map>
 
-int main(int argc, const char **argv) {
+DPSG_AOC_MAIN(file) {
   using namespace dpsg;
   using namespace std;
-  auto file = get_input("day8.txt", argc, argv);
 
   string instructions;
   getline(file, instructions); // directions

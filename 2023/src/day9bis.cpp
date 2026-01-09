@@ -4,8 +4,7 @@
 
 using namespace std;
 
-int main(int argc, const char **argv) {
-  auto file = get_input("day9.txt", argc, argv);
+DPSG_AOC_MAIN(file) {
   string line;
   int acc = 0;
   while (getline(file, line)) {

@@ -89,9 +89,7 @@ bool acceptableCube(const cube &c) {
          c.b >= 0 && c.b <= MAX_VALUES.b;
 }
 
-int main(int argc, const char **argv) {
-
-  fstream file = get_input("day2.txt", argc, argv);
+DPSG_AOC_MAIN(file) {
   uint64_t sum = 0;
 
   string line;

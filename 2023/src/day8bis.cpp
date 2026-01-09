@@ -9,9 +9,8 @@ bool end_with_z(const std::string& s) {
   return s.back() == 'Z';
 }
 
-int main(int argc, const char **argv) {
+DPSG_AOC_MAIN(file) {
   using namespace std;
-  auto file = get_input("day8.txt", argc, argv);
 
   string instructions;
   getline(file, instructions); // directions

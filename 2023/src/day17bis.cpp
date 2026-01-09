@@ -118,11 +118,9 @@ struct node_compare {
   }
 };
 
-int main(int argc, const char **argv) {
+DPSG_AOC_MAIN(file) {
   using namespace std;
   using namespace dpsg;
-
-  auto file = dpsg::get_input("day17.txt", argc, argv);
 
   vector<vector<int>> grid;
 

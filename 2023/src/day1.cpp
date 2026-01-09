@@ -1,27 +1,17 @@
-#include <fstream>
+#include "utils.hpp"
 #include <iostream>
-#include <iomanip>
 #include <cstdint>
 #include <string>
 
-using namespace std;
-
-const auto NUMBERS = "0123456789";
-
-int v(char c) {
-  return c - '0';
-}
-
-int main() {
-
-  fstream file("day1.txt", ios::in);
+DPSG_AOC_MAIN(file) {
   uint64_t sum = 0;
-  string line;
-  while (getline(file, line)) {
-    char first = line[line.find_first_of(NUMBERS)];
-    char last = line[line.find_last_of(NUMBERS)];
-    auto current = v(first) * 10 + v(last);
+  std::string line;
+
+  while (std::getline(file, line)) {
+    char first = line[line.find_first_of(dpsg::NUMBERS)];
+    char last = line[line.find_last_of(dpsg::NUMBERS)];
+    auto current = (first - '0') * 10 + (last - '0');
     sum += current;
   }
-  cout << sum << endl;
+  std::cout << sum << std::endl;
 }
