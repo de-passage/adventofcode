@@ -46,10 +46,14 @@ Adding a new day (correct placement)
 - Update that year's `CMakeLists.txt` to add the new executable target, or use the year's helper script if present in `scripts/`.
 - Keep names consistent: alternate solutions use `dayNbis.cpp` and live in the same `src` directory.
 
-Repository conventions and patterns
+- Repository conventions and patterns
 - File naming: `day<N>.cpp`, `day<N>bis.cpp`, `day<N>.txt`, `day<N>.example.txt`.
 - Minimal single-file solutions are preferred; only extract helpers into `*.hpp` when multiple days share code.
 - Compiler flags per year live in `YEAR/compile_flags.txt` (e.g. `2023/compile_flags.txt`). Respect those flags when compiling single files manually.
+
+Commenting rules
+- Do not add comments that refer to previous states of a file or explain why a past edit was made. Comments must document the current code's behavior or explain complex/ non-obvious implementation details.
+- Keep comments concise and focused: describe intent, parameters, side-effects, and any external assumptions (for example the `get_input.bash` dependency and expected session token at `$XDG_CONFIG_HOME/aoc/session`).
 
 Integration & credentials
 - No external package manager: use the system `g++` toolchain and CMake.
