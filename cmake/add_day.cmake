@@ -20,27 +20,41 @@
 #  - adds `run-${DAY}` and `run-${DAY}-example` custom targets that invoke
 #    the built executable with real/example inputs respectively
 function(add_day_target DAY INPUT EXAMPLE_INPUT DAY_NB)
-  add_executable(${DAY} src/${DAY}.cpp)
-  target_include_directories(${DAY} PRIVATE ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../common)
+  # Allow an optional prefix to be supplied by the top-level build so targets
+  # become unique when multiple years are added into the same build.
+  if(DEFINED AOC_TARGET_PREFIX)
+    set(_PREFIX ${AOC_TARGET_PREFIX})
+  else()
+    set(_PREFIX "")
+  endif()
+
+  set(_TARGET "${_PREFIX}${DAY}")
+  add_executable(${_TARGET} ${CMAKE_CURRENT_LIST_DIR}/src/${DAY}.cpp)
+  target_include_directories(${_TARGET} PRIVATE ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../common)
   set_source_files_properties(src/${DAY}.cpp PROPERTIES COMPILE_FLAGS "-DCOMPILE_UTILS=1")
 
   set(_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/input/${INPUT}.txt)
   set(_EXAMPLE_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/input/${EXAMPLE_INPUT}.txt)
 
+  # Determine the year directory name (e.g. "2023") from the current
+  # CMake source directory so the input fetch helper receives the correct
+  # year instead of a hardcoded value.
+  get_filename_component(_YEAR ${CMAKE_CURRENT_SOURCE_DIR} NAME)
+
   add_custom_command(
     OUTPUT ${_INPUT}
-    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/../scripts/get_input.bash" 2024 ${DAY_NB} ${_INPUT}
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/../scripts/get_input.bash" ${_YEAR} ${DAY_NB} ${_INPUT}
   )
 
   add_custom_target(
-    run-${DAY}
-    COMMAND $<TARGET_FILE:${DAY}> ${_INPUT}
-    DEPENDS ${DAY} ${_INPUT}
+    run-${_TARGET}
+    COMMAND $<TARGET_FILE:${_TARGET}> ${_INPUT}
+    DEPENDS ${_TARGET} ${_INPUT}
   )
   add_custom_target(
-    run-${DAY}-example
-    COMMAND $<TARGET_FILE:${DAY}> ${_EXAMPLE_INPUT}
-    DEPENDS ${DAY} ${_EXAMPLE_INPUT}
+    run-${_TARGET}-example
+    COMMAND $<TARGET_FILE:${_TARGET}> ${_EXAMPLE_INPUT}
+    DEPENDS ${_TARGET} ${_EXAMPLE_INPUT}
   )
 endfunction()
 
