@@ -8,9 +8,7 @@
 using namespace std;
 using namespace dpsg;
 
-int main(int argc, const char **argv) {
-
-  auto file = get_input("day13.txt", argc, argv);
+DPSG_AOC_MAIN(file) {
 
   string line;
   std::vector<uint32_t> lines;

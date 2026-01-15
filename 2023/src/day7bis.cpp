@@ -28,10 +28,8 @@ ostream& operator<<(ostream& os, const play& p) {
   return os << " | " << p.bid << '}';
 }
 
-int main(int argc, const char **argv) {
+DPSG_AOC_MAIN(file) {
   using namespace dpsg;
-
-  auto file = get_input("day7.txt", argc, argv);
 
   vector<play> plays;
   string line;

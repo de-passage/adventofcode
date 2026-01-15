@@ -2,10 +2,9 @@
 #include "utils.hpp"
 #include "day16.hpp"
 
-int main(int argc, const char **argv) {
+DPSG_AOC_MAIN(file) {
   using namespace std;
   using namespace dpsg;
-  auto file = get_input("day16.txt", argc, argv);
 
   string line;
   using grid = vector<vector<cell>>;
@@ -39,6 +38,4 @@ int main(int argc, const char **argv) {
   auto count = count_energized_tiles(map, ray { .pos = {0, 0}, .origin = ray_origin::left });
 
   std::cout << "Total cells energized: " << (vt100::bold | vt100::green) << count << vt100::reset << std::endl;
-
-  return 0;
 }

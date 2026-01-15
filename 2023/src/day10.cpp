@@ -109,9 +109,8 @@ void print_maze(vector<string> maze, coord s) {
   }
 }
 
-int main(int argc, const char** argv) {
+DPSG_AOC_MAIN(file) {
   using namespace dpsg;
-  auto file = get_input("day10.txt", argc, argv);
 
   vector<string> maze;
   string line;
@@ -156,10 +155,9 @@ int main(int argc, const char** argv) {
     }
     if (l == s) {
       std::cerr << "Stuck at " << l << " " << c << std::endl;
-      return 1;
+      return;
     }
   } while (maze[s.x][s.y] != 'S');
 
   std::cout << steps/2 << std::endl;
-
 }

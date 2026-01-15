@@ -5,6 +5,7 @@
 #include <regex>
 #include <string>
 #include <cstring>
+#include "utils.hpp"
 
 using namespace std;
 
@@ -41,21 +42,7 @@ template <class... Args> void logln(Args &&...args) {
   (cout << ... << args) << endl;
 }
 
-int main(int argc, char **arg) {
-  string filename = "day1.txt";
-
-  for (int i = 1; i < argc; i++) {
-    if (strcmp(arg[i], "-d") == 0)
-      LOG_LEVEL = 1;
-    else
-      filename = arg[i];
-  }
-
-  fstream file(filename, ios::in);
-  if (!file.is_open()) {
-    cerr << "Could not open file " << filename << endl;
-    return 1;
-  }
+DPSG_AOC_MAIN(file) {
   uint64_t sum = 0;
   string line;
   regex r(

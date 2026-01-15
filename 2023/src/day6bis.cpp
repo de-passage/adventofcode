@@ -10,10 +10,9 @@ struct overload_set : F... {
 template<class ...F>
 overload_set(F&&...) -> overload_set<std::decay_t<F>...>;
 
-int main(int argc, const char** argv) {
+DPSG_AOC_MAIN(file) {
   using namespace std;
   using namespace dpsg;
-  auto file = get_input("day6.txt", argc, argv);
 
   vector<int> times;
   vector<int> distances;

@@ -419,11 +419,9 @@ next_line:;
   }
 };
 
-int main(int argc, const char **argv) {
+DPSG_AOC_MAIN(file) {
   using namespace std;
   using namespace dpsg;
-
-  auto file = get_input("day14.txt", argc, argv);
 
   string line;
   dish_representation data;
@@ -512,5 +510,4 @@ next: vec.push_back(iteration - 1);
   }
 done:
 
-  return 0;
 }

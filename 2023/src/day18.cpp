@@ -58,12 +58,10 @@ coordinates move_point(coordinates from, direction d, int64_t distance) {
   }
 }
 
-int main(int argc, const char ** argv) {
+DPSG_AOC_MAIN(file) {
   using namespace std;
   using namespace dpsg;
   using namespace dpsg::vt100;
-
-  auto file = get_input("day18.txt", argc, argv);
 
   string line;
 

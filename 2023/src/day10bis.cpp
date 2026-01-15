@@ -199,8 +199,7 @@ void doit(const std::vector<string>& maze, coord s) {
   std::cout << "Area: " << area << "  Pick: " << pick << std::endl;
 }
 
-int main(int argc, const char **argv) {
-  auto file = get_input("day10.txt", argc, argv);
+DPSG_AOC_MAIN(file) {
 
   vector<string> maze;
   string line;
@@ -233,6 +232,4 @@ int main(int argc, const char **argv) {
   } else if (!maze.empty()) {
     doit(maze, s);
   }
-
-  return 0;
 }

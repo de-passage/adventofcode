@@ -4,11 +4,9 @@
 #include <vector>
 #include <iostream>
 
-int main(int argc, const char** argv) {
+DPSG_AOC_MAIN(file) {
   using namespace std;
   using namespace dpsg;
-
-  auto file = get_input("day11.txt", argc, argv);
 
   size_t line_idx = 0;
   string line;
