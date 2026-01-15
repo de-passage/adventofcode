@@ -3,6 +3,7 @@
 #include <cassert>
 #include <vector>
 #include <stack>
+#include "utils.hpp"
 
 using namespace std;
 
@@ -25,17 +26,7 @@ void printstack(vector<stack<char>>& ss) {
 }
 
 
-int main(int argc, const char** argv) {
-  if (argc <= 1) {
-    cerr << "Gimme a file pls" << endl;
-    return 1;
-  }
-  std::string filename=argv[1];
-  ifstream file(filename);
-  if (!file) {
-    cerr << "Not a good file this " << filename << endl;
-    return 1;
-  }
+DPSG_AOC_MAIN(file) {
   string line;
   int count = 0;
 
