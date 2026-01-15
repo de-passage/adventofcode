@@ -1,19 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include "utils.hpp"
 
 using namespace std;
 
-int main(int argc, const char** argv) {
-  if (argc <= 1) {
-    return 1;
-  }
-  std::string filename=argv[1];
-  ifstream file(filename);
-  if (!file) {
-    return 1;
-  }
-
+DPSG_AOC_MAIN(file) {
   string line;
   vector<vector<int>> sizes;
   while(getline(file, line)) {

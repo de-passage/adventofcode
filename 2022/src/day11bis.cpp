@@ -3,6 +3,7 @@
 #include <functional>
 #include <iostream>
 #include <queue>
+#include "utils.hpp"
 
 using namespace std;
 
@@ -64,7 +65,7 @@ struct square {
 };
 
 
-int main(int argc, const char **argv) {
+DPSG_AOC_MAIN(file) {
   constexpr uint64_t MONKEYS = 8;
   monkey monkeys[MONKEYS] = {
     {times(3), 13, 1, 7, 84, 72, 58, 51},
@@ -76,11 +77,6 @@ int main(int argc, const char **argv) {
     {add(6), 3, 1, 0, 86, 69},
     {add(1), 19, 2, 5, 91}
   };
-  /* constexpr int MONKEYS = 4;
-  monkey monkeys[MONKEYS] = {{times(19), 23, 2, 3, 79, 98},
-                             {add(6), 19, 2, 0, 54, 65, 75, 74},
-                             {square(), 13, 1, 3, 79, 60, 97},
-                             {add(3), 17, 0, 1, 74}}; */
 
   for (int i = 0; i < MONKEYS; ++i) {
     COMMON_DIVISOR *= monkeys[i].divisor;

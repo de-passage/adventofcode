@@ -3,6 +3,8 @@
 #include <iostream>
 #include <unordered_set>
 #include <cmath>
+#include <limits>
+#include "utils.hpp"
 
 using namespace std;
 
@@ -68,22 +70,13 @@ position snap(const position& head, position tail) {
   return tail;
 }
 
-int main(int argc, const char **argv) {
-  if (argc <= 1) {
-    return 1;
-  }
-  std::string filename = argv[1];
-  ifstream file(filename);
-  if (!file) {
-    return 1;
-  }
-
+DPSG_AOC_MAIN(file) {
   string line;
   unordered_set<position, position_hash> positions;
   position knots[10] = { {0, 0}, {0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0}};
   while (getline(file, line)) {
     char action = line[0];
-    int count = atoi(line.substr(line.find_first_of("0123456789")).c_str());
+    int count = std::atoi(line.substr(line.find_first_of("0123456789")).c_str());
     const position move = [action]() -> position {
       switch (action) {
       case 'D':

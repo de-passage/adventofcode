@@ -6,6 +6,7 @@
 #include <queue>
 #include <stack>
 #include <variant>
+#include "utils.hpp"
 
 using namespace std;
 
@@ -142,17 +143,7 @@ void parse_tree(tree &tree, const string_view &line) {
   }
 }
 
-int main(int argc, const char **argv) {
-  if (argc <= 1) {
-    return 1;
-  }
-  std::string filename = argv[1];
-  ifstream file(filename);
-
-  if (!file.is_open()) {
-    return 1;
-  }
-
+DPSG_AOC_MAIN(file) {
   string line1;
   string line2;
   string discard;

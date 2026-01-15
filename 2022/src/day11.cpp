@@ -3,6 +3,7 @@
 #include <functional>
 #include <iostream>
 #include <queue>
+#include "utils.hpp"
 
 using namespace std;
 
@@ -58,13 +59,7 @@ struct square {
   int operator()(int old) { return old * old; }
 };
 
-int main(int argc, const char **argv) {
-  if (argc <= 1) {
-    return 1;
-  }
-  std::string filename = argv[1];
-  ifstream file(filename);
-
+DPSG_AOC_MAIN(file) {
   constexpr int MONKEYS = 8;
   monkey monkeys[MONKEYS] = {
     {times(3), 13, 1, 7, 84, 72, 58, 51},
@@ -76,13 +71,6 @@ int main(int argc, const char **argv) {
     {add(6), 3, 1, 0, 86, 69},
     {add(1), 19, 2, 5, 91}
   };
-  if (!file) {
-    return 1;
-  }
-
-  /* string line;
-  while (getline(file, line)) {
-  } */
 
   for(int i = 0; i < 20; ++i) {
     for (int i = 0; i < MONKEYS; ++i) {

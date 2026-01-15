@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include "utils.hpp"
 
 using namespace std;
 
@@ -13,12 +14,7 @@ void print(uint64_t v) {
   }
 }
 
-int main(int argc, const char** argv) {
-  std::string filename="day3.txt";
-  if (argc > 1) {
-    filename=argv[1];
-  }
-  ifstream file(filename);
+DPSG_AOC_MAIN(file) {
   string line;
   int score=0;
   uint64_t group[3];

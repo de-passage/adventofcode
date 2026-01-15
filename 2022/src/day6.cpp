@@ -1,21 +1,10 @@
 #include <iostream>
 #include <fstream>
+#include "utils.hpp"
 
 using namespace std;
 
-
-int main(int argc, const char** argv) {
-  if (argc <= 1) {
-    cerr << "Gimme a file pls" << endl;
-    return 1;
-  }
-  std::string filename=argv[1];
-  ifstream file(filename);
-  if (!file) {
-    cerr << "Not a good file this " << filename << endl;
-    return 1;
-  }
-
+DPSG_AOC_MAIN(file) {
   char vs[4];
   for (int i = 0; i < 3; ++i) {
     file >> vs[i];
@@ -39,5 +28,4 @@ int main(int argc, const char** argv) {
       break;
     }
   }
-  return 0;
 }

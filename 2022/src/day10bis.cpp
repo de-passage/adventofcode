@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include "utils.hpp"
 
 using namespace std;
 
@@ -12,22 +13,13 @@ void inc_cycle(int& cycle, int registar) {
   cycle++;
 }
 
-int main(int argc, const char **argv) {
-  if (argc <= 1) {
-    return 1;
-  }
-  std::string filename = argv[1];
-  ifstream file(filename);
-  if (!file) {
-    return 1;
-  }
-
+DPSG_AOC_MAIN(file) {
   string line;
   int cycle = 1;
   int registar = 1;
   while(getline(file, line)) {
     if (line[0] == 'a') {
-      int i = atoi(line.substr(line.find_first_of(' ')+1).c_str());
+      int i = std::atoi(line.substr(line.find_first_of(' ')+1).c_str());
       inc_cycle(cycle, registar);
       inc_cycle(cycle, registar);
       registar+=i;

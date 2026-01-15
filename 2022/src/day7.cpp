@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <numeric>
 #include <limits>
+#include "utils.hpp"
 
 using namespace std;
 using dir_ptr=unique_ptr<struct directory>;
@@ -98,18 +99,7 @@ line_case case_of(const string& str) {
   }
 }
 
-int main(int argc, const char** argv) {
-  if (argc <= 1) {
-//    cerr << "Gimme a file pls" << endl;
-    return 1;
-  }
-  std::string filename=argv[1];
-  ifstream file(filename);
-  if (!file) {
-//    cerr << "Not a good file this " << filename << endl;
-    return 1;
-  }
-
+DPSG_AOC_MAIN(file) {
   string line;
   directory root(nullptr);
   directory* current_node = addressof(root);
@@ -152,7 +142,7 @@ int main(int argc, const char** argv) {
       case line_case::file: {
         int sep = line.find_first_of(' ');
         string name=line.substr(sep+1);
-        long size = atoi(line.substr(0, sep).c_str());
+        long size = std::stol(line.substr(0, sep));
 //        cerr << "new file: " << name << " (" << size << ")" << endl;
         current_node->add_file(name, size);
         break;

@@ -6,6 +6,8 @@
 #include <queue>
 #include <stack>
 #include <unordered_set>
+#include <limits>
+#include "utils.hpp"
 
 using namespace std;
 
@@ -94,17 +96,7 @@ int bfs(position_with_distance begin, position_with_distance end, int h, int y, 
   return numeric_limits<int>::max();
 }
 
-int main(int argc, const char **argv) {
-  if (argc <= 1) {
-    return 1;
-  }
-  std::string filename = argv[1];
-  ifstream file(filename);
-
-  if (!file.is_open()) {
-    return 1;
-  }
-
+DPSG_AOC_MAIN(file) {
   string line;
   vector<vector<int>> elevations;
   position_with_distance begin, end;
