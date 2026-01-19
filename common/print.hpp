@@ -49,6 +49,23 @@ inline void println() {
     std::println();
 }
 
+template <class... Args>
+inline void print(FILE* file, const std::format_string<Args...>& fmt, Args&&... args)
+{
+    std::print(fmt, std::forward<Args>(args)...);
+}
+
+template <class... Args>
+inline void println(FILE* file, const std::format_string<Args...>& fmt, Args&&... args)
+{
+    std::print(fmt, std::forward<Args>(args)...);
+    std::putchar('\n');
+}
+
+inline void println(FILE* file) {
+    std::println();
+}
+
 #elif defined(DPSG_HAVE_STD_FORMAT)
 
 template <class... Args>
@@ -69,7 +86,26 @@ inline void println() {
     std::putchar('\n');
 }
 
-#else 
+template <class... Args>
+inline void print(FILE* file, const std::format_string<Args...>& fmt, Args&&... args)
+{
+    auto s = std::format(fmt, std::forward<Args>(args)...);
+    std::fprintf(file, "%s", s.c_str());
+}
+
+template <class... Args>
+inline void println(FILE* file, const std::format_string<Args...>& fmt, Args&&... args)
+{
+    auto s = std::format(fmt, std::forward<Args>(args)...);
+    std::fprintf(file, "%s\n", s.c_str());
+}
+
+inline void println(FILE* file)
+{
+    std::fprintf(file, "\n");
+}
+
+#else
 
 // Error above, these stubs are here to avoid printing too much redondant info
 inline void print(...) {}
