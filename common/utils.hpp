@@ -490,6 +490,23 @@ inline std::string prepare_file_name(std::string_view file) {
   pos = file.find_first_not_of("0123456789", 3);
   return std::string{file.substr(0, pos)} + ".txt";
 }
+
+inline void configure_from_env() { 
+  const char* enable_logs_env = std::getenv("DPSG_DEBUG");
+  if (enable_logs_env == nullptr) {
+    return;
+  }
+  std::string enable_logs;
+  std::transform(enable_logs_env, enable_logs_env + std::strlen(enable_logs_env),
+                               std::back_inserter(enable_logs),
+                               [](unsigned char c) { return std::tolower(c); });
+  for (const auto &val : {"1", "true", "yes", "on"}) {
+    if (enable_logs == val) {
+      set_log_level(dpsg::log_level::debug);
+      break;
+    }
+  }
+}
 } // namespace detail
 } // namespace dpsg
 
@@ -500,6 +517,7 @@ inline std::string prepare_file_name(std::string_view file) {
   int main(int argc, const char **argv) {                                      \
     auto filevar = dpsg::get_input(                                            \
         dpsg::detail::prepare_file_name(__BASE_FILE__), argc, argv);           \
+    dpsg::detail::configure_from_env();                                        \
     dpsg::detail::aoc_main(filevar);                                           \
   }                                                                            \
   void dpsg::detail::aoc_main(std::fstream &filevar)
