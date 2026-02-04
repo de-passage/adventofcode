@@ -15,6 +15,7 @@
 #include <tuple>
 #include <type_traits>
 #include <vector>
+#include <cassert>
 
 namespace dpsg {
 
@@ -328,6 +329,17 @@ struct words {
 
   auto end() { return detail::eol_iter{}; }
 };
+
+namespace detail {
+template<class T>
+T unwrap_impl_(std::optional<T> opt, const char* message) {
+  assert (opt.has_value() && message);
+  return *opt;
+}
+}
+
+#define DPSG_STRINGIFY_(x) #x
+#define unwrap(opt) ::dpsg::detail::unwrap_impl_(opt, __FILE__ ":" DPSG_STRINGIFY_(__LINE__) " Unwrapped empty optional" )
 
 } // namespace dpsg
 

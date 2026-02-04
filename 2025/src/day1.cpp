@@ -8,9 +8,7 @@ DPSG_AOC_MAIN(file) {
 
     for (const auto& line : dpsg::lines(file)) {
         int sign = line[0] == 'L' ? -1 : 1;
-        auto number = dpsg::next_number(line);
-        assert(number.has_value());
-        int value = static_cast<int>(number->value);
+        auto value = static_cast<int>(unwrap(dpsg::next_number(line)).value);
         int offset = sign * value;
         dpsg::logln("Line: '", line, "', sign: ",  sign,", value: ",  value, ", offset: ", offset);
         current_value += offset;
