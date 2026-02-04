@@ -24,6 +24,9 @@ DAY=$2
 SESSION=$(cat "${CONFIG_FILE}")
 
 OUTPUT_FILE="${3:-input/day${DAY}.txt}"
+if [[ ! -d "$(dirname "${OUTPUT_FILE}")" ]]; then 
+  mkdir -p "$(dirname "${OUTPUT_FILE}")"
+fi
 
 if ! curl -X GET https://adventofcode.com/${YEAR}/day/${DAY}/input \
   -H "Cookie: session=${SESSION}" \
