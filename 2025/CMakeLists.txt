@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 include(../cmake/add_day.cmake)
 
-set(CURRENT_DAY 1)
+set(CURRENT_DAY 2)
 
 project(advent_of_code_2025)
 
